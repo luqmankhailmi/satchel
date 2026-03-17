@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
 
 export default defineConfig(async () => ({
   plugins: [react()],
@@ -14,8 +13,5 @@ export default defineConfig(async () => ({
     target: process.env.TAURI_PLATFORM == "windows" ? "chrome105" : "safari13",
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_DEBUG,
-    rollupOptions: {
-      input: resolve(__dirname, "app.html"),
-    },
   },
 }));
