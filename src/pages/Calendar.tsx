@@ -1,13 +1,14 @@
 import { useState, useMemo } from "react";
 import { useStore } from "../store/useStore";
 import Modal from "../components/Modal";
+import DailyJournalModal from "../components/DailyJournalModal";
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval,
   startOfWeek, endOfWeek, isSameMonth, isSameDay, parseISO, isToday,
   addMonths, subMonths,
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
-import { CalendarEvent, EventType } from "../types";
+import { CalendarEvent, EventType, JournalEntry } from "../types";
 
 const EVENT_COLORS: Record<EventType, string> = {
   event: "bg-indigo-500",
@@ -31,12 +32,17 @@ const blank = (): Omit<CalendarEvent, "id"> => ({
 });
 
 export default function Calendar() {
-  const { events, courses, tasks, addEvent, updateEvent, deleteEvent } = useStore();
+  const {
+    events, courses, tasks,
+    addEvent, updateEvent, deleteEvent,
+    journal, upsertJournalEntry, deleteJournalEntry,
+  } = useStore();
   const [current, setCurrent] = useState(new Date());
   const [selected, setSelected] = useState<string | null>(null);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<CalendarEvent | null>(null);
   const [form, setForm] = useState(blank());
+  const [journalOpen, setJournalOpen] = useState(false);
 
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(current), { weekStartsOn: 1 });
@@ -61,6 +67,13 @@ export default function Calendar() {
   const selectedDateKey = selected ?? format(new Date(), "yyyy-MM-dd");
   const selectedEvents = eventsByDate[selectedDateKey] ?? [];
   const selectedTasks = tasksByDate[selectedDateKey] ?? [];
+  const selectedJournal = journal[selectedDateKey];
+
+  const snip = (s?: string, n = 120) => {
+    const t = (s ?? "").trim();
+    if (!t) return "";
+    return t.length > n ? `${t.slice(0, n)}...` : t;
+  };
 
   const openAdd = () => {
     setEditing(null);
@@ -111,6 +124,7 @@ export default function Calendar() {
             const todayDay = isToday(day);
             const dayEvents = eventsByDate[key] ?? [];
             const dayTasks = tasksByDate[key] ?? [];
+            const hasJournal = !!journal[key];
 
             return (
               <div
@@ -118,8 +132,13 @@ export default function Calendar() {
                 onClick={() => setSelected(key)}
                 className={`p-2 min-h-[90px] cursor-pointer transition-colors ${isSelected ? "bg-[#1c2540]" : "bg-[#0d1120] hover:bg-[#111829]"} ${!isCurrentMonth ? "opacity-40" : ""}`}
               >
-                <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold mb-1 ${todayDay ? "bg-indigo-600 text-white" : "text-slate-400"}`}>
-                  {format(day, "d")}
+                <div className="flex items-center justify-between mb-1">
+                  <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${todayDay ? "bg-indigo-600 text-white" : "text-slate-400"}`}>
+                    {format(day, "d")}
+                  </div>
+                  {hasJournal && (
+                    <div className="w-2 h-2 rounded-sm bg-emerald-400/90 ring-1 ring-white/10" title="Journal entry" />
+                  )}
                 </div>
                 <div className="space-y-0.5">
                   {dayEvents.slice(0, 2).map(e => (
@@ -151,6 +170,45 @@ export default function Calendar() {
           <button onClick={openAdd} className="btn-primary flex items-center gap-1 py-1.5 px-2.5 text-xs">
             <Plus size={12} /> Add
           </button>
+        </div>
+
+        {/* Journal */}
+        <div className="rounded-lg p-3 border bg-[#0f1520] border-[#1e2640]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-slate-300">Daily Journal</p>
+            <button className="btn-secondary text-xs px-3 py-1.5" onClick={() => setJournalOpen(true)}>
+              {selectedJournal ? "Edit" : "Add"}
+            </button>
+          </div>
+          {!selectedJournal ? (
+            <p className="text-xs text-slate-600 mt-2">No entry yet for this day.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {selectedJournal.mood && (
+                <div className="text-[10px] text-slate-500">
+                  Mood: <span className="text-slate-300 font-medium">{selectedJournal.mood}/5</span>
+                </div>
+              )}
+              {snip(selectedJournal.studied) && (
+                <div>
+                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Studied</p>
+                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.studied)}</p>
+                </div>
+              )}
+              {snip(selectedJournal.learned) && (
+                <div>
+                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Learned</p>
+                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.learned)}</p>
+                </div>
+              )}
+              {snip(selectedJournal.felt) && (
+                <div>
+                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Felt</p>
+                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.felt)}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {selectedEvents.length === 0 && selectedTasks.length === 0 && (
@@ -242,6 +300,21 @@ export default function Calendar() {
           </div>
         </div>
       </Modal>
+
+      <DailyJournalModal
+        open={journalOpen}
+        date={selectedDateKey}
+        entry={selectedJournal as JournalEntry | undefined}
+        onClose={() => setJournalOpen(false)}
+        onSave={(draft) => {
+          upsertJournalEntry(selectedDateKey, draft);
+          setJournalOpen(false);
+        }}
+        onDelete={() => {
+          deleteJournalEntry(selectedDateKey);
+          setJournalOpen(false);
+        }}
+      />
     </div>
   );
 }

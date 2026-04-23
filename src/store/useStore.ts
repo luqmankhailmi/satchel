@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { v4 as uuid } from "uuid";
 import {
   Course, Task, CalendarEvent, Note, TimetableSlot,
-  Project, ProjectTask, ExamPaper, Resource, Grade
+  Project, ProjectTask, ExamPaper, Resource, Grade, JournalEntry
 } from "../types";
 
 interface AppState {
@@ -16,6 +16,7 @@ interface AppState {
   examPapers: ExamPaper[];
   resources: Resource[];
   grades: Grade[];
+  journal: Record<string, JournalEntry>; // key: YYYY-MM-DD
 
   // Courses
   addCourse: (c: Omit<Course, "id" | "createdAt">) => void;
@@ -65,6 +66,10 @@ interface AppState {
   addGrade: (g: Omit<Grade, "id">) => void;
   updateGrade: (id: string, g: Partial<Grade>) => void;
   deleteGrade: (id: string) => void;
+
+  // Journal (one entry per day)
+  upsertJournalEntry: (date: string, entry: Partial<Omit<JournalEntry, "date" | "createdAt" | "updatedAt">> & { mood?: JournalEntry["mood"] }) => void;
+  deleteJournalEntry: (date: string) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -79,6 +84,7 @@ export const useStore = create<AppState>()(
       examPapers: [],
       resources: [],
       grades: [],
+      journal: {},
 
       // Courses
       addCourse: (c) =>
@@ -183,6 +189,29 @@ export const useStore = create<AppState>()(
         set((s) => ({ grades: s.grades.map((x) => (x.id === id ? { ...x, ...g } : x)) })),
       deleteGrade: (id) =>
         set((s) => ({ grades: s.grades.filter((x) => x.id !== id) })),
+
+      // Journal
+      upsertJournalEntry: (date, entry) =>
+        set((s) => {
+          const existing = s.journal[date];
+          const now = new Date().toISOString();
+          const next: JournalEntry = {
+            date,
+            studied: entry.studied ?? existing?.studied ?? "",
+            learned: entry.learned ?? existing?.learned ?? "",
+            felt: entry.felt ?? existing?.felt ?? "",
+            mood: entry.mood ?? existing?.mood,
+            createdAt: existing?.createdAt ?? now,
+            updatedAt: now,
+          };
+          return { journal: { ...s.journal, [date]: next } };
+        }),
+      deleteJournalEntry: (date) =>
+        set((s) => {
+          if (!s.journal[date]) return s;
+          const { [date]: _, ...rest } = s.journal;
+          return { journal: rest };
+        }),
     }),
     { name: "satchel-storage" }
   )

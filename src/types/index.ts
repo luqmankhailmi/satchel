@@ -121,3 +121,13 @@ export interface Grade {
   weight: number;
   date?: string;
 }
+
+export interface JournalEntry {
+  date: string; // YYYY-MM-DD (local)
+  studied: string;
+  learned: string;
+  felt: string;
+  mood?: 1 | 2 | 3 | 4 | 5;
+  createdAt: string;
+  updatedAt: string;
+}

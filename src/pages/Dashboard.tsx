@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "../store/useStore";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,21 +6,57 @@ import {
   Clock, TrendingUp, AlertTriangle, Calendar,
 } from "lucide-react";
 import { format, isToday, isTomorrow, parseISO, isAfter, isBefore, addDays, startOfDay, subDays } from "date-fns";
+import DailyJournalModal from "../components/DailyJournalModal";
+import { JournalEntry } from "../types";
 
-function HeatmapCell({ count }: { count: number }) {
-  const bg =
+function activityBg(count: number) {
+  return (
     count === 0 ? "bg-[#1a2035]" :
     count === 1 ? "bg-indigo-900/60" :
     count === 2 ? "bg-indigo-700/70" :
     count === 3 ? "bg-indigo-500/80" :
-    "bg-indigo-400";
-  return <div className={`w-3 h-3 rounded-sm ${bg} transition-colors`} title={`${count} activities`} />;
+    "bg-indigo-400"
+  );
+}
+
+function moodMeta(mood?: JournalEntry["mood"]) {
+  const m = mood ?? 3;
+  if (m === 1) return { label: "Rough", bg: "bg-rose-600/70" };
+  if (m === 2) return { label: "Low", bg: "bg-amber-600/70" };
+  if (m === 3) return { label: "Neutral", bg: "bg-slate-500/60" };
+  if (m === 4) return { label: "Good", bg: "bg-emerald-600/70" };
+  return { label: "Great", bg: "bg-emerald-400" };
+}
+
+function JournalHeatmapCell(props: {
+  date: string;
+  activityCount: number;
+  entry?: JournalEntry;
+  onOpen: (date: string) => void;
+}) {
+  const { date, activityCount, entry, onOpen } = props;
+  const bg = entry ? moodMeta(entry.mood).bg : activityBg(activityCount);
+  const title = entry
+    ? `${date}\nJournal: ${moodMeta(entry.mood).label}\n${activityCount} activities`
+    : `${date}\n${activityCount} activities\n(Click to add journal)`;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(date)}
+      className={`w-3 h-3 rounded-sm ${bg} transition-colors hover:brightness-110 ${entry ? "ring-1 ring-white/10" : ""}`}
+      title={title}
+    />
+  );
 }
 
 export default function Dashboard() {
-  const { tasks, notes, courses, projects, events, grades } = useStore();
+  const { tasks, notes, courses, projects, events, grades, journal, upsertJournalEntry, deleteJournalEntry } = useStore();
   const navigate = useNavigate();
   const today = new Date();
+  const todayKey = format(today, "yyyy-MM-dd");
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [journalDate, setJournalDate] = useState(todayKey);
 
   const stats = useMemo(() => {
     const pending = tasks.filter(t => t.status !== "done").length;
@@ -65,8 +101,12 @@ export default function Dashboard() {
     events.forEach(e => {
       if (days[e.date] !== undefined) days[e.date]++;
     });
-    return Object.entries(days).map(([date, count]) => ({ date, count }));
-  }, [tasks, notes, events]);
+    return Object.entries(days).map(([date, count]) => ({
+      date,
+      activityCount: count,
+      entry: journal[date],
+    }));
+  }, [tasks, notes, events, journal]);
 
   // GPA Estimate
   const gpa = useMemo(() => {
@@ -87,10 +127,15 @@ export default function Dashboard() {
   };
 
   // Build weeks for heatmap display
-  const weeks: { date: string; count: number }[][] = [];
+  const weeks: { date: string; activityCount: number; entry?: JournalEntry }[][] = [];
   for (let i = 0; i < heatmap.length; i += 7) {
     weeks.push(heatmap.slice(i, i + 7));
   }
+
+  const openJournal = (date: string) => {
+    setJournalDate(date);
+    setJournalOpen(true);
+  };
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
@@ -230,24 +275,68 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Activity Heatmap */}
+      {/* Daily Journal */}
       <div className="card">
-        <h2 className="text-sm font-semibold text-slate-300 mb-4">Activity Heatmap</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-300">Daily Journal</h2>
+            <p className="text-[11px] text-slate-600 mt-0.5">Click any day to log what you studied, learned, and how you felt.</p>
+          </div>
+          <button onClick={() => openJournal(todayKey)} className="btn-secondary text-xs px-3 py-2">
+            Open Today
+          </button>
+        </div>
+
         <div className="flex gap-1 overflow-x-auto pb-2">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-1">
               {week.map((day) => (
-                <HeatmapCell key={day.date} count={day.count} />
+                <JournalHeatmapCell
+                  key={day.date}
+                  date={day.date}
+                  activityCount={day.activityCount}
+                  entry={day.entry}
+                  onOpen={openJournal}
+                />
               ))}
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-1 mt-3 justify-end">
-          <span className="text-[10px] text-slate-600 mr-1">Less</span>
-          {[0, 1, 2, 3, 4].map(n => <HeatmapCell key={n} count={n} />)}
-          <span className="text-[10px] text-slate-600 ml-1">More</span>
+
+        <div className="flex items-center justify-between gap-3 mt-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-slate-600">Journal</span>
+            {[1, 2, 3, 4, 5].map((m) => (
+              <div
+                key={m}
+                className={`w-3 h-3 rounded-sm ${moodMeta(m as JournalEntry["mood"]).bg} ring-1 ring-white/10`}
+                title={`Mood: ${moodMeta(m as JournalEntry["mood"]).label}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-slate-600 mr-1">Activity</span>
+            {[0, 1, 2, 3, 4].map((n) => (
+              <div key={n} className={`w-3 h-3 rounded-sm ${activityBg(n)} transition-colors`} title={`${n} activities`} />
+            ))}
+          </div>
         </div>
       </div>
+
+      <DailyJournalModal
+        open={journalOpen}
+        date={journalDate}
+        entry={journal[journalDate]}
+        onClose={() => setJournalOpen(false)}
+        onSave={(draft) => {
+          upsertJournalEntry(journalDate, draft);
+          setJournalOpen(false);
+        }}
+        onDelete={() => {
+          deleteJournalEntry(journalDate);
+          setJournalOpen(false);
+        }}
+      />
 
       {/* Courses quick-view */}
       {courses.length > 0 && (
