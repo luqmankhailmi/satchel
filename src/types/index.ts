@@ -91,6 +91,7 @@ export interface ExamPaper {
   year: string;
   semester: string;
   filePath?: string;
+  fileName?: string;
   url?: string;
   notes?: string;
   uploadedAt: string;
@@ -101,7 +102,9 @@ export type ResourceType = "video" | "article" | "book" | "paper" | "tool" | "ot
 export interface Resource {
   id: string;
   title: string;
-  url: string;
+  url?: string;
+  filePath?: string;
+  fileName?: string;
   courseId?: string;
   type: ResourceType;
   tags: string[];

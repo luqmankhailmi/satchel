@@ -14,9 +14,27 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "shell": {
+      "dialog": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "all": false,
+        "copyFile": true,
+        "createDir": true,
+        "exists": true,
+        "removeFile": true,
+        "scope": [
+          "$APPDATA/**",
+          "$HOME/**"
+        ]
+      },
+      "path": {
+        "all": true
+      },
+      "shell": {
+        "all": false,
+        "open": "^((mailto:)|(tel:)|(https?://)|(file://)|([a-zA-Z]:\\\\)|([a-zA-Z]:/)|(\\\\\\\\)|(/)).+"
       }
     },
     "bundle": {

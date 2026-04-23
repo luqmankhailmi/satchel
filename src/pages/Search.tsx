@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
-import { useStore } from "../store/useStore";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, CheckSquare, FileText, BookOpen, FolderKanban, Archive, Link2, Calendar } from "lucide-react";
+import { Archive, BookOpen, Calendar, CheckSquare, FileText, FolderKanban, Link2, Search } from "lucide-react";
+import { useStore } from "../store/useStore";
 
 type ResultType = "task" | "note" | "course" | "project" | "exam" | "resource" | "event";
 
@@ -60,7 +60,7 @@ export default function SearchPage() {
 
     const resourceResults = resources
       .filter(r => r.title.toLowerCase().includes(q) || r.notes?.toLowerCase().includes(q) || r.tags.some(t => t.includes(q)))
-      .map(r => ({ id: r.id, type: "resource" as ResultType, title: r.title, subtitle: r.url, path: "/resources" }));
+      .map(r => ({ id: r.id, type: "resource" as ResultType, title: r.title, subtitle: r.url ?? r.fileName ?? (r.filePath ? "Local file" : ""), path: "/resources" }));
 
     const eventResults = events
       .filter(e => e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q))
@@ -152,7 +152,7 @@ export default function SearchPage() {
 }
 
 function highlightMatch(text: string, query: string): string {
-  return text; // In production you'd wrap matches in <mark> — returning plain for safety
+  return text; // In production you'd wrap matches in <mark> – returning plain for safety
 }
 
 function TYPE_BADGE(type: ResultType): string {
@@ -167,3 +167,4 @@ function TYPE_BADGE(type: ResultType): string {
   };
   return map[type];
 }
+

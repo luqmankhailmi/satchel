@@ -13,7 +13,7 @@ rust-version = "1.60"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.6", features = ["shell-open"] }
+tauri = { version = "1.6", features = ["shell-open", "dialog-open", "fs-copy-file", "fs-create-dir", "fs-exists", "fs-remove-file", "path-all"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
