@@ -10,6 +10,7 @@ import Courses from "./pages/Courses";
 import ExamPapers from "./pages/ExamPapers";
 import Resources from "./pages/Resources";
 import Search from "./pages/Search";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="exams" element={<ExamPapers />} />
           <Route path="resources" element={<Resources />} />
           <Route path="search" element={<Search />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

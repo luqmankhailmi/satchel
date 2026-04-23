@@ -89,13 +89,13 @@ export default function Notes() {
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <div className="w-64 shrink-0 border-r border-[#1a2035] flex flex-col">
-        <div className="p-3 border-b border-[#1a2035] space-y-2">
+      <div className="w-64 shrink-0 border-r border-[var(--border-2)] flex flex-col">
+        <div className="p-3 border-b border-[var(--border-2)] space-y-2">
           <button onClick={startNew} className="btn-primary w-full flex items-center gap-2 justify-center text-xs py-2">
             <Plus size={13} /> New Note
           </button>
           <div className="relative">
-            <Search size={12} className="absolute left-2.5 top-2.5 text-slate-600" />
+            <Search size={12} className="absolute left-2.5 top-2.5 text-[var(--text-faint)]" />
             <input className="input pl-7 text-xs py-2" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes..." />
           </div>
           <select className="input text-xs py-1.5" value={courseFilter} onChange={e => setCourseFilter(e.target.value)}>
@@ -104,20 +104,20 @@ export default function Notes() {
           </select>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {filtered.length === 0 && <p className="text-slate-700 text-xs text-center py-8">No notes</p>}
+          {filtered.length === 0 && <p className="text-[var(--text-faint)] text-xs text-center py-8">No notes</p>}
           {filtered.map(n => {
             const course = getCourse(n.courseId);
             return (
               <div
                 key={n.id}
                 onClick={() => selectNote(n)}
-                className={`p-3 border-b border-[#1a2035] cursor-pointer hover:bg-[#111829] transition-colors ${selected === n.id ? "bg-[#111829] border-l-2 border-l-indigo-500" : ""}`}
+                className={`p-3 border-b border-[var(--border-2)] cursor-pointer hover:bg-[var(--surface-3)] transition-colors ${selected === n.id ? "bg-[var(--surface-3)] border-l-2 border-l-indigo-500" : ""}`}
               >
-                <p className="text-sm font-medium text-slate-200 truncate">{n.title || "Untitled"}</p>
-                <p className="text-xs text-slate-600 truncate mt-0.5">{n.content.slice(0, 60)}</p>
+                <p className="text-sm font-medium text-[var(--text-strong)] truncate">{n.title || "Untitled"}</p>
+                <p className="text-xs text-[var(--text-faint)] truncate mt-0.5">{n.content.slice(0, 60)}</p>
                 <div className="flex items-center gap-2 mt-1">
                   {course && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: course.color + "25", color: course.color }}>{course.code}</span>}
-                  <span className="text-[10px] text-slate-700 ml-auto">{format(parseISO(n.updatedAt), "MMM d")}</span>
+                  <span className="text-[10px] text-[var(--text-faint)] ml-auto">{format(parseISO(n.updatedAt), "MMM d")}</span>
                 </div>
               </div>
             );
@@ -128,7 +128,7 @@ export default function Notes() {
       {/* Editor */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {!isNew && !selected ? (
-          <div className="flex-1 flex items-center justify-center text-slate-700">
+          <div className="flex-1 flex items-center justify-center text-[var(--text-faint)]">
             <div className="text-center">
               <Edit3 size={40} className="mx-auto mb-3 opacity-30" />
               <p>Select a note or create a new one</p>
@@ -137,9 +137,9 @@ export default function Notes() {
         ) : (
           <>
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#1a2035]">
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-[var(--border-2)]">
               <input
-                className="flex-1 bg-transparent text-lg font-semibold text-slate-100 outline-none placeholder-slate-700"
+                className="flex-1 bg-transparent text-lg font-semibold text-[var(--text-strong)] outline-none placeholder-[var(--placeholder)]"
                 value={form.title}
                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                 placeholder="Note title..."
@@ -163,8 +163,8 @@ export default function Notes() {
             </div>
 
             {/* Tags */}
-            <div className="flex items-center gap-2 px-6 py-2 border-b border-[#1a2035] flex-wrap">
-              <Tag size={12} className="text-slate-600" />
+            <div className="flex items-center gap-2 px-6 py-2 border-b border-[var(--border-2)] flex-wrap">
+              <Tag size={12} className="text-[var(--text-faint)]" />
               {form.tags.map(t => (
                 <span key={t} className="flex items-center gap-1 bg-indigo-900/30 text-indigo-300 text-xs px-2 py-0.5 rounded-full">
                   {t}
@@ -172,7 +172,7 @@ export default function Notes() {
                 </span>
               ))}
               <input
-                className="bg-transparent text-xs text-slate-400 outline-none placeholder-slate-700 w-24"
+                className="bg-transparent text-xs text-[var(--text-muted)] outline-none placeholder-[var(--placeholder)] w-24"
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); } }}
@@ -189,7 +189,7 @@ export default function Notes() {
                 />
               ) : (
                 <textarea
-                  className="w-full h-full bg-transparent text-slate-300 text-sm leading-relaxed resize-none outline-none px-6 py-4 font-mono"
+                  className="w-full h-full bg-transparent text-[var(--text)] text-sm leading-relaxed resize-none outline-none px-6 py-4 font-mono placeholder-[var(--placeholder)]"
                   value={form.content}
                   onChange={e => {
                     setForm(p => ({ ...p, content: e.target.value }));

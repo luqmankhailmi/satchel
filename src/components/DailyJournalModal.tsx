@@ -69,7 +69,7 @@ export default function DailyJournalModal(props: {
             </select>
           </div>
           <div className="flex items-end">
-            <p className="text-xs text-slate-600 leading-5">
+            <p className="text-xs text-[var(--text-faint)] leading-5">
               One entry per day. Use this as your daily study log: what you studied, what you learned, how you felt.
             </p>
           </div>
@@ -134,4 +134,3 @@ export default function DailyJournalModal(props: {
     </Modal>
   );
 }
-

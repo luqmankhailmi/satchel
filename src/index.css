@@ -7,6 +7,74 @@
   box-sizing: border-box;
 }
 
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --app-bg: #0a0b10;
+  --sidebar-bg: #0d1020;
+  --surface-1: #131825; /* cards, modals */
+  --surface-2: #0f1520; /* inputs, inner panels */
+  --surface-3: #111829; /* hover surface */
+  --surface-4: #0d1120; /* calendar cells */
+
+  /* Borders */
+  --border: #1e2640;
+  --border-2: #1a2035;
+
+  /* Text */
+  --text-strong: #e2e8f0;
+  --text: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --placeholder: #475569;
+
+  /* Buttons */
+  --btn-secondary-bg: #1c2030;
+  --btn-secondary-bg-hover: #252840;
+
+  /* Heatmap (activity) */
+  --heat-0: #1a2035;
+  --heat-1: rgba(49, 46, 129, 0.6); /* indigo-900 */
+  --heat-2: rgba(67, 56, 202, 0.7); /* indigo-700 */
+  --heat-3: rgba(99, 102, 241, 0.8); /* indigo-500 */
+  --heat-4: #818cf8; /* indigo-400 */
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --app-bg: #f6f7fb;
+  --sidebar-bg: #ffffff;
+  --surface-1: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-3: #e9eef8;
+  --surface-4: #ffffff;
+
+  /* Borders */
+  --border: #e2e8f0;
+  --border-2: #d7deea;
+
+  /* Text */
+  --text-strong: #0f172a;
+  --text: #1f2937;
+  --text-muted: #475569;
+  --text-faint: #64748b;
+  --placeholder: #94a3b8;
+
+  /* Buttons */
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-bg-hover: #eef2ff;
+
+  /* Heatmap (activity) */
+  --heat-0: #e2e8f0;
+  --heat-1: rgba(199, 210, 254, 0.85); /* indigo-200 */
+  --heat-2: rgba(165, 180, 252, 0.9);  /* indigo-300 */
+  --heat-3: rgba(129, 140, 248, 0.95); /* indigo-400 */
+  --heat-4: rgba(99, 102, 241, 0.95);  /* indigo-500 */
+}
+
 html,
 body,
 #root {
@@ -14,8 +82,8 @@ body,
   margin: 0;
   padding: 0;
   font-family: "Inter", system-ui, sans-serif;
-  background-color: #0a0b10;
-  color: #e2e8f0;
+  background-color: var(--app-bg);
+  color: var(--text);
 }
 
 /* Custom Scrollbar */
@@ -42,21 +110,21 @@ select {
 }
 
 /* Markdown Preview Styles */
-.markdown-preview h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: #e2e8f0; }
-.markdown-preview h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #e2e8f0; }
-.markdown-preview h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: #cbd5e1; }
-.markdown-preview p { margin-bottom: 0.75rem; line-height: 1.7; color: #cbd5e1; }
+.markdown-preview h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-strong); }
+.markdown-preview h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-strong); }
+.markdown-preview h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+.markdown-preview p { margin-bottom: 0.75rem; line-height: 1.7; color: var(--text); }
 .markdown-preview ul, .markdown-preview ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
-.markdown-preview li { margin-bottom: 0.25rem; color: #cbd5e1; }
+.markdown-preview li { margin-bottom: 0.25rem; color: var(--text); }
 .markdown-preview ul { list-style-type: disc; }
 .markdown-preview ol { list-style-type: decimal; }
-.markdown-preview code { background: #1c2333; padding: 0.1rem 0.3rem; border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.85em; color: #a5f3fc; }
-.markdown-preview pre { background: #1c2333; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 0.75rem; }
+.markdown-preview code { background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.85em; color: #0ea5e9; }
+.markdown-preview pre { background: var(--surface-2); padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 0.75rem; border: 1px solid var(--border); }
 .markdown-preview pre code { background: none; padding: 0; }
-.markdown-preview blockquote { border-left: 3px solid #6366f1; padding-left: 1rem; color: #94a3b8; margin-bottom: 0.75rem; }
-.markdown-preview strong { font-weight: 600; color: #e2e8f0; }
+.markdown-preview blockquote { border-left: 3px solid #6366f1; padding-left: 1rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.markdown-preview strong { font-weight: 600; color: var(--text-strong); }
 .markdown-preview em { font-style: italic; }
-.markdown-preview hr { border: none; border-top: 1px solid #252d40; margin: 1rem 0; }
+.markdown-preview hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
 .markdown-preview a { color: #818cf8; text-decoration: underline; }
 
 @layer components {
@@ -64,19 +132,34 @@ select {
     @apply bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors;
   }
   .btn-secondary {
-    @apply bg-[#1c2030] hover:bg-[#252840] text-slate-300 border border-[#252d40] px-4 py-2 rounded-lg text-sm font-medium transition-colors;
+    @apply border px-4 py-2 rounded-lg text-sm font-medium transition-colors;
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover {
+    background-color: var(--btn-secondary-bg-hover);
   }
   .btn-danger {
     @apply bg-red-900/30 hover:bg-red-800/50 text-red-400 border border-red-900/50 px-4 py-2 rounded-lg text-sm font-medium transition-colors;
   }
   .card {
-    @apply bg-[#131825] border border-[#1e2640] rounded-xl p-4;
+    @apply border rounded-xl p-4;
+    background-color: var(--surface-1);
+    border-color: var(--border);
   }
   .input {
-    @apply bg-[#0f1520] border border-[#1e2640] rounded-lg px-3 py-2 text-slate-200 text-sm w-full focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600;
+    @apply border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:border-indigo-500 transition-colors;
+    background-color: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .input::placeholder {
+    color: var(--placeholder);
   }
   .label {
-    @apply text-slate-400 text-xs font-medium mb-1 block;
+    @apply text-xs font-medium mb-1 block;
+    color: var(--text-muted);
   }
   .badge {
     @apply px-2 py-0.5 rounded-full text-xs font-medium;

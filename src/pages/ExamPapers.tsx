@@ -123,8 +123,8 @@ export default function ExamPapers() {
     <div className="p-6 max-w-[900px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Exam Papers</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Store past exam papers (files) and quick-access links</p>
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">Exam Papers</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">Store past exam papers (files) and quick-access links</p>
         </div>
         <div className="flex items-center gap-2">
           <select className="input w-40" value={filterCourse} onChange={e => setFilterCourse(e.target.value)}>
@@ -138,9 +138,9 @@ export default function ExamPapers() {
       </div>
 
       {courses.length === 0 ? (
-        <div className="card text-center py-12 text-slate-600">Add courses first to store exam papers.</div>
+        <div className="card text-center py-12 text-[var(--text-faint)]">Add courses first to store exam papers.</div>
       ) : filtered.length === 0 ? (
-        <div className="card flex flex-col items-center py-16 text-slate-600">
+        <div className="card flex flex-col items-center py-16 text-[var(--text-faint)]">
           <Archive size={40} className="mb-3 opacity-30" />
           <p>No exam papers stored yet.</p>
         </div>
@@ -152,8 +152,8 @@ export default function ExamPapers() {
               <div key={courseName}>
                 <div className="flex items-center gap-2 mb-3">
                   {course && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: course.color }} />}
-                  <h2 className="text-sm font-semibold text-slate-300">{courseName}</h2>
-                  <span className="text-xs text-slate-600">({papers.length})</span>
+                  <h2 className="text-sm font-semibold text-[var(--text-strong)]">{courseName}</h2>
+                  <span className="text-xs text-[var(--text-faint)]">({papers.length})</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {papers.map(p => (
@@ -161,11 +161,11 @@ export default function ExamPapers() {
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-slate-200">{p.year}</span>
-                            {p.semester && <span className="badge bg-slate-800 text-slate-400">{p.semester}</span>}
+                            <span className="text-sm font-semibold text-[var(--text-strong)]">{p.year}</span>
+                            {p.semester && <span className="badge bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]">{p.semester}</span>}
                           </div>
-                          {p.notes && <p className="text-xs text-slate-500 mt-1">{p.notes}</p>}
-                          <p className="text-[10px] text-slate-700 mt-1">Added {format(parseISO(p.uploadedAt), "MMM d, yyyy")}</p>
+                          {p.notes && <p className="text-xs text-[var(--text-muted)] mt-1">{p.notes}</p>}
+                          <p className="text-[10px] text-[var(--text-faint)] mt-1">Added {format(parseISO(p.uploadedAt), "MMM d, yyyy")}</p>
                         </div>
                         <div className="flex gap-1">
                           {p.url && (
@@ -182,7 +182,7 @@ export default function ExamPapers() {
                               <FileText size={13} />
                             </button>
                           )}
-                          <button onClick={() => openEdit(p)} className="hidden group-hover:block text-slate-500 hover:text-slate-300 p-1"><Edit2 size={13} /></button>
+                          <button onClick={() => openEdit(p)} className="hidden group-hover:block text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1"><Edit2 size={13} /></button>
                           <button onClick={() => void deletePaper(p)} className="hidden group-hover:block text-red-700 hover:text-red-400 p-1"><Trash2 size={13} /></button>
                         </div>
                       </div>
@@ -238,13 +238,13 @@ export default function ExamPapers() {
               </button>
               {form.filePath ? (
                 <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                  <span className="text-xs text-slate-500 truncate" title={form.fileName || form.filePath}>
+                  <span className="text-xs text-[var(--text-muted)] truncate" title={form.fileName || form.filePath}>
                     {form.fileName || form.filePath}
                   </span>
                   <button onClick={() => void removeFile()} className="text-xs text-red-500 hover:text-red-400">Remove</button>
                 </div>
               ) : (
-                <span className="text-xs text-slate-700">Optional (PDF, docs, images, etc.)</span>
+                <span className="text-xs text-[var(--text-faint)]">Optional (PDF, docs, images, etc.)</span>
               )}
             </div>
           </div>

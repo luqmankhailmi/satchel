@@ -18,6 +18,9 @@ interface AppState {
   grades: Grade[];
   journal: Record<string, JournalEntry>; // key: YYYY-MM-DD
 
+  theme: "dark" | "light";
+  setTheme: (theme: "dark" | "light") => void;
+
   // Courses
   addCourse: (c: Omit<Course, "id" | "createdAt">) => void;
   updateCourse: (id: string, c: Partial<Course>) => void;
@@ -85,6 +88,8 @@ export const useStore = create<AppState>()(
       resources: [],
       grades: [],
       journal: {},
+      theme: "dark",
+      setTheme: (theme) => set(() => ({ theme })),
 
       // Courses
       addCourse: (c) =>

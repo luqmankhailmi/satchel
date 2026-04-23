@@ -11,11 +11,11 @@ import { JournalEntry } from "../types";
 
 function activityBg(count: number) {
   return (
-    count === 0 ? "bg-[#1a2035]" :
-    count === 1 ? "bg-indigo-900/60" :
-    count === 2 ? "bg-indigo-700/70" :
-    count === 3 ? "bg-indigo-500/80" :
-    "bg-indigo-400"
+    count === 0 ? "bg-[var(--heat-0)]" :
+    count === 1 ? "bg-[var(--heat-1)]" :
+    count === 2 ? "bg-[var(--heat-2)]" :
+    count === 3 ? "bg-[var(--heat-3)]" :
+    "bg-[var(--heat-4)]"
   );
 }
 
@@ -142,10 +142,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">
+          <h1 className="text-2xl font-bold text-[var(--text-strong)]">
             {format(today, "EEEE")}, <span className="text-indigo-400">{format(today, "MMMM d")}</span>
           </h1>
-          <p className="text-slate-500 text-sm mt-0.5">Here's what's on your plate today.</p>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">Here's what's on your plate today.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => navigate("/tasks")} className="btn-secondary flex items-center gap-2">
@@ -170,7 +170,7 @@ export default function Dashboard() {
               <Icon size={20} className={color} />
             </div>
             <div>
-              <p className="text-slate-500 text-xs">{label}</p>
+              <p className="text-[var(--text-muted)] text-xs">{label}</p>
               <p className={`text-2xl font-bold ${color}`}>{value}</p>
             </div>
           </div>
@@ -180,25 +180,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-3 gap-4">
         {/* Upcoming */}
         <div className="col-span-2 card">
-          <h2 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-[var(--text-strong)] mb-4 flex items-center gap-2">
             <Clock size={15} className="text-indigo-400" /> Upcoming (next 7 days)
           </h2>
           {upcoming.length === 0 ? (
-            <p className="text-slate-600 text-sm py-4 text-center">Nothing coming up — you're free!</p>
+            <p className="text-[var(--text-faint)] text-sm py-4 text-center">Nothing coming up - you're free!</p>
           ) : (
             <div className="space-y-2">
               {upcoming.map(item => {
                 const course = getCourse(item.courseId);
                 return (
-                  <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-[#0f1520] border border-[#1a2333] hover:border-indigo-600/30 transition-colors">
+                  <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] hover:border-indigo-600/30 transition-colors">
                     <div className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ backgroundColor: course?.color ?? "#6366f1" }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-200 truncate">{item.title}</p>
-                      {course && <p className="text-xs text-slate-600">{course.code}</p>}
+                      <p className="text-sm text-[var(--text-strong)] truncate">{item.title}</p>
+                      {course && <p className="text-xs text-[var(--text-faint)]">{course.code}</p>}
                     </div>
                     <div className="text-right">
-                      <span className="text-xs text-slate-500">{dateLabel(item.date)}</span>
-                      <span className={`ml-2 badge ${item.type === "task" ? "bg-indigo-900/40 text-indigo-300" : item.type === "exam" ? "bg-red-900/40 text-red-300" : "bg-slate-800 text-slate-400"}`}>
+                      <span className="text-xs text-[var(--text-muted)]">{dateLabel(item.date)}</span>
+                      <span className={`ml-2 badge ${item.type === "task" ? "bg-indigo-900/40 text-indigo-300" : item.type === "exam" ? "bg-red-900/40 text-red-300" : "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]"}`}>
                         {item.type}
                       </span>
                     </div>
@@ -213,18 +213,18 @@ export default function Dashboard() {
         <div className="space-y-4">
           {/* Today's Events */}
           <div className="card">
-            <h2 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-[var(--text-strong)] mb-3 flex items-center gap-2">
               <Calendar size={15} className="text-indigo-400" /> Today
             </h2>
             {todayEvents.length === 0 ? (
-              <p className="text-slate-600 text-xs">No events today.</p>
+              <p className="text-[var(--text-faint)] text-xs">No events today.</p>
             ) : (
               <div className="space-y-1.5">
                 {todayEvents.slice(0, 4).map(e => (
-                  <div key={e.id} className="flex items-center gap-2 text-xs text-slate-400">
+                  <div key={e.id} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                     <span className="truncate">{e.title}</span>
-                    {e.startTime && <span className="ml-auto text-slate-600">{e.startTime}</span>}
+                    {e.startTime && <span className="ml-auto text-[var(--text-faint)]">{e.startTime}</span>}
                   </div>
                 ))}
               </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
 
           {/* Overview */}
           <div className="card">
-            <h2 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-[var(--text-strong)] mb-3 flex items-center gap-2">
               <FolderKanban size={15} className="text-indigo-400" /> Overview
             </h2>
             <div className="space-y-2 text-sm">
@@ -247,8 +247,8 @@ export default function Dashboard() {
                   onClick={() => navigate(path)}
                   className="flex justify-between items-center cursor-pointer hover:text-indigo-300 transition-colors"
                 >
-                  <span className="text-slate-500">{label}</span>
-                  <span className="text-slate-200 font-semibold">{value}</span>
+                  <span className="text-[var(--text-muted)]">{label}</span>
+                  <span className="text-[var(--text-strong)] font-semibold">{value}</span>
                 </div>
               ))}
             </div>
@@ -256,17 +256,17 @@ export default function Dashboard() {
 
           {/* Notes preview */}
           <div className="card">
-            <h2 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-[var(--text-strong)] mb-3 flex items-center gap-2">
               <FileText size={15} className="text-indigo-400" /> Recent Notes
             </h2>
             {notes.length === 0 ? (
-              <p className="text-slate-600 text-xs">No notes yet.</p>
+              <p className="text-[var(--text-faint)] text-xs">No notes yet.</p>
             ) : (
               <div className="space-y-1.5">
                 {notes.slice(-3).reverse().map(n => (
                   <div key={n.id} className="cursor-pointer" onClick={() => navigate("/notes")}>
-                    <p className="text-xs text-slate-300 truncate hover:text-indigo-300 transition-colors">{n.title}</p>
-                    <p className="text-[10px] text-slate-600">{format(parseISO(n.updatedAt), "MMM d")}</p>
+                    <p className="text-xs text-[var(--text)] truncate hover:text-indigo-300 transition-colors">{n.title}</p>
+                    <p className="text-[10px] text-[var(--text-faint)]">{format(parseISO(n.updatedAt), "MMM d")}</p>
                   </div>
                 ))}
               </div>
@@ -279,8 +279,8 @@ export default function Dashboard() {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-sm font-semibold text-slate-300">Daily Journal</h2>
-            <p className="text-[11px] text-slate-600 mt-0.5">Click any day to log what you studied, learned, and how you felt.</p>
+            <h2 className="text-sm font-semibold text-[var(--text-strong)]">Daily Journal</h2>
+            <p className="text-[11px] text-[var(--text-faint)] mt-0.5">Click any day to log what you studied, learned, and how you felt.</p>
           </div>
           <button onClick={() => openJournal(todayKey)} className="btn-secondary text-xs px-3 py-2">
             Open Today
@@ -305,7 +305,7 @@ export default function Dashboard() {
 
         <div className="flex items-center justify-between gap-3 mt-3">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-600">Journal</span>
+            <span className="text-[10px] text-[var(--text-faint)]">Journal</span>
             {[1, 2, 3, 4, 5].map((m) => (
               <div
                 key={m}
@@ -315,7 +315,7 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-slate-600 mr-1">Activity</span>
+            <span className="text-[10px] text-[var(--text-faint)] mr-1">Activity</span>
             {[0, 1, 2, 3, 4].map((n) => (
               <div key={n} className={`w-3 h-3 rounded-sm ${activityBg(n)} transition-colors`} title={`${n} activities`} />
             ))}
@@ -341,18 +341,18 @@ export default function Dashboard() {
       {/* Courses quick-view */}
       {courses.length > 0 && (
         <div className="card">
-          <h2 className="text-sm font-semibold text-slate-300 mb-4">My Courses</h2>
+          <h2 className="text-sm font-semibold text-[var(--text-strong)] mb-4">My Courses</h2>
           <div className="grid grid-cols-3 gap-3">
             {courses.map(c => (
               <div
                 key={c.id}
                 onClick={() => navigate("/courses")}
-                className="flex items-center gap-3 p-3 rounded-lg bg-[#0f1520] border border-[#1a2333] hover:border-indigo-600/30 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] hover:border-indigo-600/30 cursor-pointer transition-colors"
               >
                 <div className="w-3 h-8 rounded-full" style={{ backgroundColor: c.color }} />
                 <div className="min-w-0">
-                  <p className="text-sm text-slate-200 font-medium truncate">{c.code}</p>
-                  <p className="text-xs text-slate-500 truncate">{c.name}</p>
+                  <p className="text-sm text-[var(--text-strong)] font-medium truncate">{c.code}</p>
+                  <p className="text-xs text-[var(--text-muted)] truncate">{c.name}</p>
                 </div>
               </div>
             ))}

@@ -6,7 +6,7 @@ import { Task, TaskStatus, TaskPriority } from "../types";
 import { format, parseISO, isBefore, startOfDay } from "date-fns";
 
 const PRIORITY_BADGE: Record<TaskPriority, string> = {
-  low: "bg-slate-800 text-slate-400",
+  low: "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]",
   medium: "bg-amber-900/40 text-amber-300",
   high: "bg-red-900/40 text-red-300",
 };
@@ -63,8 +63,8 @@ export default function Tasks() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Tasks</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">Tasks</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">
             {tasks.filter(t => t.status !== "done").length} pending · {tasks.filter(t => t.status === "done").length} done
           </p>
         </div>
@@ -73,12 +73,12 @@ export default function Tasks() {
             <option value="">All Courses</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.code}</option>)}
           </select>
-          <div className="flex border border-[#1e2640] rounded-lg overflow-hidden">
+          <div className="flex border border-[var(--border)] rounded-lg overflow-hidden">
             {([["all", "All"], ["todo", "Todo"], ["in-progress", "Active"], ["done", "Done"]] as const).map(([val, lbl]) => (
               <button
                 key={val}
                 onClick={() => setFilter(val)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${filter === val ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"}`}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${filter === val ? "bg-indigo-600 text-white" : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"}`}
               >{lbl}</button>
             ))}
           </div>
@@ -94,15 +94,15 @@ export default function Tasks() {
           {columns.map(col => {
             const colTasks = filtered.filter(t => t.status === col.id);
             return (
-              <div key={col.id} className={`flex-1 min-w-[260px] bg-[#0d1120] rounded-xl border-t-2 ${col.color} flex flex-col`}>
-                <div className="p-3 flex items-center justify-between border-b border-[#1a2035]">
-                  <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{col.label}</span>
-                  <span className="text-xs text-slate-600 bg-[#1a2035] rounded-full px-2 py-0.5">{colTasks.length}</span>
+              <div key={col.id} className={`flex-1 min-w-[260px] bg-[var(--surface-4)] rounded-xl border border-[var(--border-2)] border-t-2 ${col.color} flex flex-col`}>
+                <div className="p-3 flex items-center justify-between border-b border-[var(--border-2)]">
+                  <span className="text-xs font-semibold text-[var(--text)] uppercase tracking-wider">{col.label}</span>
+                  <span className="text-xs text-[var(--text-faint)] bg-[var(--border-2)] rounded-full px-2 py-0.5">{colTasks.length}</span>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
                   {colTasks.map(t => <TaskCard key={t.id} task={t} getCourse={getCourse} isOverdue={isOverdue} onEdit={openEdit} onDelete={deleteTask} onComplete={completeTask} onStatus={(id, status) => updateTask(id, { status })} />)}
                   {colTasks.length === 0 && (
-                    <div className="text-center py-8 text-slate-700 text-xs">Empty</div>
+                    <div className="text-center py-8 text-[var(--text-faint)] text-xs">Empty</div>
                   )}
                 </div>
               </div>
@@ -113,7 +113,7 @@ export default function Tasks() {
         /* List View */
         <div className="space-y-2 flex-1 overflow-y-auto">
           {filtered.map(t => <TaskCard key={t.id} task={t} getCourse={getCourse} isOverdue={isOverdue} onEdit={openEdit} onDelete={deleteTask} onComplete={completeTask} onStatus={(id, status) => updateTask(id, { status })} />)}
-          {filtered.length === 0 && <p className="text-slate-600 text-sm text-center py-16">No tasks found.</p>}
+          {filtered.length === 0 && <p className="text-[var(--text-faint)] text-sm text-center py-16">No tasks found.</p>}
         </div>
       )}
 
@@ -186,14 +186,14 @@ function TaskCard({ task, getCourse, isOverdue, onEdit, onDelete, onComplete, on
         <button onClick={() => task.status === "done" ? onStatus(task.id, "todo") : onComplete(task.id)} className="mt-0.5 shrink-0">
           {task.status === "done"
             ? <CheckCircle2 size={16} className="text-emerald-500" />
-            : <Circle size={16} className="text-slate-600 hover:text-indigo-400 transition-colors" />}
+            : <Circle size={16} className="text-[var(--text-faint)] hover:text-indigo-400 transition-colors" />}
         </button>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium ${task.status === "done" ? "line-through text-slate-600" : "text-slate-200"}`}>{task.title}</p>
-          {task.description && <p className="text-xs text-slate-500 mt-0.5 truncate">{task.description}</p>}
+          <p className={`text-sm font-medium ${task.status === "done" ? "line-through text-[var(--text-faint)]" : "text-[var(--text-strong)]"}`}>{task.title}</p>
+          {task.description && <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">{task.description}</p>}
         </div>
         <div className="hidden group-hover:flex gap-1">
-          <button onClick={() => onEdit(task)} className="text-slate-500 hover:text-slate-300 p-1"><Edit2 size={12} /></button>
+          <button onClick={() => onEdit(task)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1"><Edit2 size={12} /></button>
           <button onClick={() => onDelete(task.id)} className="text-red-600 hover:text-red-400 p-1"><Trash2 size={12} /></button>
         </div>
       </div>
@@ -205,7 +205,7 @@ function TaskCard({ task, getCourse, isOverdue, onEdit, onDelete, onComplete, on
           </span>
         )}
         {task.dueDate && (
-          <span className={`flex items-center gap-1 text-[10px] ml-auto ${overdue ? "text-red-400" : "text-slate-600"}`}>
+          <span className={`flex items-center gap-1 text-[10px] ml-auto ${overdue ? "text-red-400" : "text-[var(--text-faint)]"}`}>
             <Clock size={10} />
             {format(parseISO(task.dueDate), "MMM d")}
             {overdue && " (overdue)"}

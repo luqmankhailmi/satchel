@@ -51,8 +51,8 @@ export default function Timetable() {
     <div className="p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Timetable</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Your weekly class schedule</p>
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">Timetable</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">Your weekly class schedule</p>
         </div>
         <button onClick={openAdd} className="btn-primary flex items-center gap-2">
           <Plus size={15} /> Add Slot
@@ -60,7 +60,7 @@ export default function Timetable() {
       </div>
 
       {courses.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-slate-600 text-sm">
+        <div className="flex-1 flex items-center justify-center text-[var(--text-faint)] text-sm">
           Add courses first before building your timetable.
         </div>
       ) : (
@@ -71,7 +71,7 @@ export default function Timetable() {
               <div className="h-10" />
               {HOURS.map(h => (
                 <div key={h} className="h-16 flex items-start pt-1 pr-2">
-                  <span className="text-[10px] text-slate-600 font-mono">{h}</span>
+                  <span className="text-[10px] text-[var(--text-faint)] font-mono">{h}</span>
                 </div>
               ))}
             </div>
@@ -83,12 +83,12 @@ export default function Timetable() {
                 <div key={day} className="flex-1 min-w-0">
                   {/* Day header */}
                   <div className="h-10 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{day}</span>
+                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{day}</span>
                   </div>
                   {/* Grid rows */}
-                  <div className="relative border-l border-[#1a2035]">
+                  <div className="relative border-l border-[var(--border-2)]">
                     {HOURS.map(h => (
-                      <div key={h} className="h-16 border-b border-[#1a2035]" />
+                      <div key={h} className="h-16 border-b border-[var(--border-2)]" />
                     ))}
                     {/* Slots */}
                     {slots.map(slot => {
@@ -104,15 +104,15 @@ export default function Timetable() {
                           <div className="flex items-start justify-between">
                             <div className="min-w-0">
                               <p className="text-xs font-semibold truncate" style={{ color: course.color }}>{course.code}</p>
-                              <p className="text-[10px] text-slate-400 truncate">{slot.type}</p>
-                              {slot.room && <p className="text-[10px] text-slate-500 truncate">{slot.room}</p>}
+                              <p className="text-[10px] text-[var(--text-muted)] truncate">{slot.type}</p>
+                              {slot.room && <p className="text-[10px] text-[var(--text-faint)] truncate">{slot.room}</p>}
                             </div>
                             <div className="hidden group-hover:flex gap-0.5 ml-1">
-                              <button onClick={() => openEdit(slot)} className="p-0.5 text-slate-400 hover:text-white"><Edit2 size={10} /></button>
+                              <button onClick={() => openEdit(slot)} className="p-0.5 text-[var(--text-muted)] hover:text-[var(--text-strong)]"><Edit2 size={10} /></button>
                               <button onClick={() => deleteSlot(slot.id)} className="p-0.5 text-red-500 hover:text-red-300"><Trash2 size={10} /></button>
                             </div>
                           </div>
-                          <p className="text-[9px] text-slate-500 mt-0.5">{slot.startTime}–{slot.endTime}</p>
+                          <p className="text-[9px] text-[var(--text-faint)] mt-0.5">{slot.startTime}–{slot.endTime}</p>
                         </div>
                       );
                     })}

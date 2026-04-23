@@ -14,7 +14,7 @@ const TYPE_BADGE: Record<ResourceType, string> = {
   book: "bg-amber-900/30 text-amber-300",
   paper: "bg-purple-900/30 text-purple-300",
   tool: "bg-emerald-900/30 text-emerald-300",
-  other: "bg-slate-800 text-slate-400",
+  other: "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]",
 };
 
 const blank = (): Omit<Resource, "id" | "createdAt"> => ({
@@ -157,8 +157,8 @@ export default function Resources() {
     <div className="p-6 max-w-[1000px] mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Resources</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{resources.length} saved ({linksCount} links, {filesCount} files)</p>
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">Resources</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">{resources.length} saved ({linksCount} links, {filesCount} files)</p>
         </div>
         <button onClick={openAdd} className="btn-primary flex items-center gap-2">
           <Plus size={15} /> Add Resource
@@ -172,12 +172,12 @@ export default function Resources() {
           <option value="">All courses</option>
           {courses.map(c => <option key={c.id} value={c.id}>{c.code}</option>)}
         </select>
-        <div className="flex border border-[#1e2640] rounded-lg overflow-hidden">
-          <button onClick={() => setFilterType("")} className={`px-3 py-1.5 text-xs font-medium transition-colors ${filterType === "" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"}`}>All</button>
+        <div className="flex border border-[var(--border)] rounded-lg overflow-hidden">
+          <button onClick={() => setFilterType("")} className={`px-3 py-1.5 text-xs font-medium transition-colors ${filterType === "" ? "bg-indigo-600 text-white" : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"}`}>All</button>
           {(["video", "article", "book", "paper", "tool", "other"] as ResourceType[]).map(t => {
             const Icon = TYPE_ICONS[t];
             return (
-              <button key={t} onClick={() => setFilterType(t === filterType ? "" : t)} className={`px-3 py-1.5 text-xs font-medium transition-colors flex items-center gap-1 ${filterType === t ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"}`}>
+              <button key={t} onClick={() => setFilterType(t === filterType ? "" : t)} className={`px-3 py-1.5 text-xs font-medium transition-colors flex items-center gap-1 ${filterType === t ? "bg-indigo-600 text-white" : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"}`}>
                 <Icon size={11} /> {t}
               </button>
             );
@@ -186,7 +186,7 @@ export default function Resources() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="card flex flex-col items-center py-16 text-slate-600">
+        <div className="card flex flex-col items-center py-16 text-[var(--text-faint)]">
           <Link2 size={40} className="mb-3 opacity-30" />
           <p>No resources saved. Add links or upload files (books, articles, videos & more).</p>
         </div>
@@ -197,8 +197,8 @@ export default function Resources() {
             return (
               <div key={type}>
                 <div className="flex items-center gap-2 mb-3">
-                  <Icon size={14} className="text-slate-500" />
-                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{type}s</h2>
+                  <Icon size={14} className="text-[var(--text-muted)]" />
+                  <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{type}s</h2>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {grouped[type].map(r => {
@@ -213,37 +213,37 @@ export default function Resources() {
                             <div className="flex items-center gap-2 flex-wrap">
                               {hasUrl ? (
                                 <a href={r.url} target="_blank" rel="noopener noreferrer"
-                                  className="text-sm font-medium text-slate-200 hover:text-indigo-300 transition-colors flex items-center gap-1 truncate">
+                                  className="text-sm font-medium text-[var(--text-strong)] hover:text-indigo-300 transition-colors flex items-center gap-1 truncate">
                                   {r.title}
-                                  <ExternalLink size={11} className="shrink-0 text-slate-600" />
+                                  <ExternalLink size={11} className="shrink-0 text-[var(--text-faint)]" />
                                 </a>
                               ) : hasFile ? (
                                 <button
                                   onClick={() => void openFile(r.filePath!)}
-                                  className="text-sm font-medium text-slate-200 hover:text-indigo-300 transition-colors flex items-center gap-1 truncate text-left"
+                                  className="text-sm font-medium text-[var(--text-strong)] hover:text-indigo-300 transition-colors flex items-center gap-1 truncate text-left"
                                   title={r.fileName ?? "Open file"}
                                 >
                                   {r.title}
-                                  <FileText size={11} className="shrink-0 text-slate-600" />
+                                  <FileText size={11} className="shrink-0 text-[var(--text-faint)]" />
                                 </button>
                               ) : (
-                                <span className="text-sm font-medium text-slate-200 truncate">{r.title}</span>
+                                <span className="text-sm font-medium text-[var(--text-strong)] truncate">{r.title}</span>
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <span className={`badge ${TYPE_BADGE[r.type]}`}>{r.type}</span>
                               {course && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: course.color + "20", color: course.color }}>{course.code}</span>}
-                              {r.tags.map(t => <span key={t} className="badge bg-slate-800/60 text-slate-500 text-[10px]">#{t}</span>)}
+                              {r.tags.map(t => <span key={t} className="badge bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)] text-[10px]">#{t}</span>)}
                             </div>
-                            {r.notes && <p className="text-xs text-slate-600 mt-1">{r.notes}</p>}
+                            {r.notes && <p className="text-xs text-[var(--text-faint)] mt-1">{r.notes}</p>}
                             {hasFile && (
-                              <p className="text-[10px] text-slate-700 mt-1 truncate" title={r.fileName || r.filePath}>
+                              <p className="text-[10px] text-[var(--text-faint)] mt-1 truncate" title={r.fileName || r.filePath}>
                                 File: {r.fileName || r.filePath}
                               </p>
                             )}
                           </div>
                           <div className="hidden group-hover:flex gap-1 shrink-0">
-                            <button onClick={() => openEdit(r)} className="text-slate-600 hover:text-slate-300 p-1"><Edit2 size={12} /></button>
+                            <button onClick={() => openEdit(r)} className="text-[var(--text-faint)] hover:text-[var(--text-strong)] p-1"><Edit2 size={12} /></button>
                             <button onClick={() => void deleteResourceWithFile(r)} className="text-red-700 hover:text-red-400 p-1"><Trash2 size={12} /></button>
                           </div>
                         </div>
@@ -264,7 +264,7 @@ export default function Resources() {
           <div>
             <label className="label">URL</label>
             <input className="input" value={form.url ?? ""} onChange={e => setForm(p => ({ ...p, url: e.target.value }))} placeholder="https://..." />
-            <p className="text-[10px] text-slate-700 mt-1">Provide either a URL or an uploaded file.</p>
+            <p className="text-[10px] text-[var(--text-faint)] mt-1">Provide either a URL or an uploaded file.</p>
           </div>
 
           <div>
@@ -275,13 +275,13 @@ export default function Resources() {
               </button>
               {form.filePath ? (
                 <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                  <span className="text-xs text-slate-500 truncate" title={form.fileName || form.filePath}>
+                  <span className="text-xs text-[var(--text-muted)] truncate" title={form.fileName || form.filePath}>
                     {form.fileName || form.filePath}
                   </span>
                   <button onClick={() => void removeFile()} className="text-xs text-red-500 hover:text-red-400">Remove</button>
                 </div>
               ) : (
-                <span className="text-xs text-slate-700">Optional (PDF, docs, images, etc.)</span>
+                <span className="text-xs text-[var(--text-faint)]">Optional (PDF, docs, images, etc.)</span>
               )}
             </div>
           </div>
@@ -309,9 +309,9 @@ export default function Resources() {
             </div>
             <div className="flex flex-wrap gap-1">
               {form.tags.map(t => (
-                <span key={t} className="badge bg-slate-800 text-slate-400 flex items-center gap-1">
+                <span key={t} className="badge bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)] flex items-center gap-1">
                   {t}
-                  <button onClick={() => setForm(p => ({ ...p, tags: p.tags.filter(x => x !== t) }))} className="text-slate-600 hover:text-white">×</button>
+                  <button onClick={() => setForm(p => ({ ...p, tags: p.tags.filter(x => x !== t) }))} className="text-[var(--text-faint)] hover:text-[var(--text-strong)]">×</button>
                 </span>
               ))}
             </div>

@@ -79,11 +79,11 @@ export default function SearchPage() {
 
   return (
     <div className="p-6 max-w-[700px] mx-auto">
-      <h1 className="text-xl font-bold text-slate-100 mb-5">Search</h1>
+      <h1 className="text-xl font-bold text-[var(--text-strong)] mb-5">Search</h1>
 
       {/* Search Bar */}
       <div className="relative mb-6">
-        <Search size={18} className="absolute left-4 top-3.5 text-slate-500" />
+        <Search size={18} className="absolute left-4 top-3.5 text-[var(--text-muted)]" />
         <input
           autoFocus
           className="input pl-11 py-3 text-base rounded-xl"
@@ -95,15 +95,15 @@ export default function SearchPage() {
 
       {/* Results */}
       {query.length >= 2 && results.length === 0 && (
-        <div className="text-center py-12 text-slate-600">
+        <div className="text-center py-12 text-[var(--text-faint)]">
           <Search size={32} className="mx-auto mb-3 opacity-30" />
-          <p>No results found for "<span className="text-slate-400">{query}</span>"</p>
+          <p>No results found for "<span className="text-[var(--text-muted)]">{query}</span>"</p>
         </div>
       )}
 
       {query.length >= 2 && results.length > 0 && (
         <div className="space-y-5">
-          <p className="text-xs text-slate-600">{results.length} result{results.length !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-[var(--text-faint)]">{results.length} result{results.length !== 1 ? "s" : ""}</p>
           {types.map(type => {
             const config = TYPE_CONFIG[type];
             const Icon = config.icon;
@@ -111,23 +111,23 @@ export default function SearchPage() {
               <div key={type}>
                 <div className="flex items-center gap-2 mb-2">
                   <Icon size={13} className={config.color} />
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{config.label}s</span>
-                  <span className="text-xs text-slate-700">({grouped[type]!.length})</span>
+                  <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{config.label}s</span>
+                  <span className="text-xs text-[var(--text-faint)]">({grouped[type]!.length})</span>
                 </div>
                 <div className="space-y-1.5">
                   {grouped[type]!.map(r => (
                     <button
                       key={r.id}
                       onClick={() => navigate(r.path)}
-                      className="w-full text-left card hover:border-indigo-600/30 hover:bg-[#111829] transition-colors flex items-start gap-3"
+                      className="w-full text-left card hover:border-indigo-600/30 hover:bg-[var(--surface-3)] transition-colors flex items-start gap-3"
                     >
                       <Icon size={15} className={`${config.color} mt-0.5 shrink-0`} />
                       <div className="min-w-0">
-                        <p className="text-sm text-slate-200 font-medium truncate">
+                        <p className="text-sm text-[var(--text-strong)] font-medium truncate">
                           {highlightMatch(r.title, query)}
                         </p>
                         {r.subtitle && (
-                          <p className="text-xs text-slate-600 truncate mt-0.5">{r.subtitle}</p>
+                          <p className="text-xs text-[var(--text-faint)] truncate mt-0.5">{r.subtitle}</p>
                         )}
                       </div>
                       <span className={`badge ${TYPE_BADGE(type)} ml-auto shrink-0`}>{config.label}</span>
@@ -141,7 +141,7 @@ export default function SearchPage() {
       )}
 
       {query.length < 2 && (
-        <div className="text-center py-12 text-slate-700">
+        <div className="text-center py-12 text-[var(--text-faint)]">
           <Search size={40} className="mx-auto mb-3 opacity-20" />
           <p className="text-sm">Type at least 2 characters to search</p>
           <p className="text-xs mt-1">Searches tasks, notes, courses, projects, resources, events & exam papers</p>
@@ -167,4 +167,3 @@ function TYPE_BADGE(type: ResultType): string {
   };
   return map[type];
 }
-

@@ -100,7 +100,7 @@ export default function Calendar() {
       <div className="flex-1 p-6 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-xl font-bold text-slate-100">{format(current, "MMMM yyyy")}</h1>
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">{format(current, "MMMM yyyy")}</h1>
           <div className="flex items-center gap-2">
             <button onClick={() => setCurrent(subMonths(current, 1))} className="btn-secondary p-2"><ChevronLeft size={16} /></button>
             <button onClick={() => setCurrent(new Date())} className="btn-secondary text-xs px-3 py-2">Today</button>
@@ -111,12 +111,12 @@ export default function Calendar() {
         {/* Day Headers */}
         <div className="grid grid-cols-7 mb-2">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => (
-            <div key={d} className="text-center text-xs text-slate-600 font-semibold uppercase py-1">{d}</div>
+            <div key={d} className="text-center text-xs text-[var(--text-faint)] font-semibold uppercase py-1">{d}</div>
           ))}
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-7 gap-px flex-1 bg-[#1a2035] rounded-xl overflow-hidden border border-[#1a2035]">
+        <div className="grid grid-cols-7 gap-px flex-1 bg-[var(--border-2)] rounded-xl overflow-hidden border border-[var(--border-2)]">
           {days.map(day => {
             const key = format(day, "yyyy-MM-dd");
             const isCurrentMonth = isSameMonth(day, current);
@@ -130,10 +130,10 @@ export default function Calendar() {
               <div
                 key={key}
                 onClick={() => setSelected(key)}
-                className={`p-2 min-h-[90px] cursor-pointer transition-colors ${isSelected ? "bg-[#1c2540]" : "bg-[#0d1120] hover:bg-[#111829]"} ${!isCurrentMonth ? "opacity-40" : ""}`}
+                className={`p-2 min-h-[90px] cursor-pointer transition-colors ${isSelected ? "bg-indigo-600/10" : "bg-[var(--surface-4)] hover:bg-[var(--surface-3)]"} ${!isCurrentMonth ? "opacity-40" : ""}`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${todayDay ? "bg-indigo-600 text-white" : "text-slate-400"}`}>
+                  <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${todayDay ? "bg-indigo-600 text-white" : "text-[var(--text-muted)]"}`}>
                     {format(day, "d")}
                   </div>
                   {hasJournal && (
@@ -147,12 +147,12 @@ export default function Calendar() {
                     </div>
                   ))}
                   {dayTasks.slice(0, 1).map(t => (
-                    <div key={t.id} className="text-[10px] px-1 py-0.5 rounded truncate bg-slate-700/50 text-slate-300">
+                    <div key={t.id} className="text-[10px] px-1 py-0.5 rounded truncate bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)]">
                       {t.title}
                     </div>
                   ))}
                   {(dayEvents.length + dayTasks.length) > 3 && (
-                    <div className="text-[9px] text-slate-600">+{dayEvents.length + dayTasks.length - 3} more</div>
+                    <div className="text-[9px] text-[var(--text-faint)]">+{dayEvents.length + dayTasks.length - 3} more</div>
                   )}
                 </div>
               </div>
@@ -162,9 +162,9 @@ export default function Calendar() {
       </div>
 
       {/* Sidebar Panel */}
-      <div className="w-72 border-l border-[#1a2035] p-4 flex flex-col gap-4 overflow-y-auto">
+      <div className="w-72 border-l border-[var(--border-2)] p-4 flex flex-col gap-4 overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-200">
+          <h2 className="text-sm font-semibold text-[var(--text-strong)]">
             {selectedDateKey ? format(parseISO(selectedDateKey), "EEE, MMM d") : "Select a day"}
           </h2>
           <button onClick={openAdd} className="btn-primary flex items-center gap-1 py-1.5 px-2.5 text-xs">
@@ -173,38 +173,38 @@ export default function Calendar() {
         </div>
 
         {/* Journal */}
-        <div className="rounded-lg p-3 border bg-[#0f1520] border-[#1e2640]">
+        <div className="rounded-lg p-3 border bg-[var(--surface-2)] border-[var(--border)]">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-300">Daily Journal</p>
+            <p className="text-xs font-semibold text-[var(--text-strong)]">Daily Journal</p>
             <button className="btn-secondary text-xs px-3 py-1.5" onClick={() => setJournalOpen(true)}>
               {selectedJournal ? "Edit" : "Add"}
             </button>
           </div>
           {!selectedJournal ? (
-            <p className="text-xs text-slate-600 mt-2">No entry yet for this day.</p>
+            <p className="text-xs text-[var(--text-faint)] mt-2">No entry yet for this day.</p>
           ) : (
             <div className="mt-2 space-y-2">
               {selectedJournal.mood && (
-                <div className="text-[10px] text-slate-500">
-                  Mood: <span className="text-slate-300 font-medium">{selectedJournal.mood}/5</span>
+                <div className="text-[10px] text-[var(--text-muted)]">
+                  Mood: <span className="text-[var(--text-strong)] font-medium">{selectedJournal.mood}/5</span>
                 </div>
               )}
               {snip(selectedJournal.studied) && (
                 <div>
-                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Studied</p>
-                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.studied)}</p>
+                  <p className="text-[10px] text-[var(--text-faint)] font-semibold uppercase tracking-wide">Studied</p>
+                  <p className="text-xs text-[var(--text)] leading-5">{snip(selectedJournal.studied)}</p>
                 </div>
               )}
               {snip(selectedJournal.learned) && (
                 <div>
-                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Learned</p>
-                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.learned)}</p>
+                  <p className="text-[10px] text-[var(--text-faint)] font-semibold uppercase tracking-wide">Learned</p>
+                  <p className="text-xs text-[var(--text)] leading-5">{snip(selectedJournal.learned)}</p>
                 </div>
               )}
               {snip(selectedJournal.felt) && (
                 <div>
-                  <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Felt</p>
-                  <p className="text-xs text-slate-300 leading-5">{snip(selectedJournal.felt)}</p>
+                  <p className="text-[10px] text-[var(--text-faint)] font-semibold uppercase tracking-wide">Felt</p>
+                  <p className="text-xs text-[var(--text)] leading-5">{snip(selectedJournal.felt)}</p>
                 </div>
               )}
             </div>
@@ -212,7 +212,7 @@ export default function Calendar() {
         </div>
 
         {selectedEvents.length === 0 && selectedTasks.length === 0 && (
-          <p className="text-slate-600 text-xs text-center py-8">Nothing here. Add an event!</p>
+          <p className="text-[var(--text-faint)] text-xs text-center py-8">Nothing here. Add an event!</p>
         )}
 
         {selectedEvents.map(e => (
@@ -224,7 +224,7 @@ export default function Calendar() {
                 {e.description && <p className="text-xs opacity-60 mt-1">{e.description}</p>}
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(e)} className="text-slate-500 hover:text-slate-300 p-1">✎</button>
+                <button onClick={() => openEdit(e)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1">✎</button>
                 <button onClick={() => deleteEvent(e.id)} className="text-red-600 hover:text-red-400 p-1"><Trash2 size={12} /></button>
               </div>
             </div>
@@ -232,18 +232,18 @@ export default function Calendar() {
         ))}
 
         {selectedTasks.map(t => (
-          <div key={t.id} className="rounded-lg p-3 border bg-slate-800/30 border-slate-700/30">
-            <p className="text-sm text-slate-300 font-medium">{t.title}</p>
-            <p className="text-xs text-slate-500 mt-0.5">Task due</p>
+          <div key={t.id} className="rounded-lg p-3 border bg-[var(--surface-2)] border-[var(--border)]">
+            <p className="text-sm text-[var(--text)] font-medium">{t.title}</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Task due</p>
           </div>
         ))}
 
         {/* Legend */}
-        <div className="mt-auto pt-4 border-t border-[#1a2035]">
-          <p className="text-xs text-slate-600 mb-2 font-semibold">Legend</p>
+        <div className="mt-auto pt-4 border-t border-[var(--border-2)]">
+          <p className="text-xs text-[var(--text-faint)] mb-2 font-semibold">Legend</p>
           <div className="grid grid-cols-2 gap-1">
             {(Object.keys(EVENT_COLORS) as EventType[]).map(type => (
-              <div key={type} className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div key={type} className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
                 <div className={`w-2 h-2 rounded-full ${EVENT_COLORS[type]}`} />
                 {type}
               </div>

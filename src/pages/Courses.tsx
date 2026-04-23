@@ -76,8 +76,8 @@ export default function Courses() {
     <div className="p-6 max-w-[900px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Courses</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
+          <h1 className="text-xl font-bold text-[var(--text-strong)]">Courses</h1>
+          <p className="text-[var(--text-muted)] text-sm mt-0.5">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
         </div>
         <button onClick={openAdd} className="btn-primary flex items-center gap-2">
           <Plus size={15} /> Add Course
@@ -85,7 +85,7 @@ export default function Courses() {
       </div>
 
       {courses.length === 0 && (
-        <div className="card flex flex-col items-center py-16 text-slate-600">
+        <div className="card flex flex-col items-center py-16 text-[var(--text-faint)]">
           <BookOpen size={40} className="mb-3 opacity-30" />
           <p>No courses yet. Add your first one!</p>
         </div>
@@ -100,7 +100,7 @@ export default function Courses() {
           const cNotes = notes.filter(n => n.courseId === c.id).length;
 
           return (
-            <div key={c.id} className="card border border-[#1e2640] overflow-hidden">
+            <div key={c.id} className="card overflow-hidden">
               {/* Header row */}
               <div
                 className="flex items-center gap-4 cursor-pointer"
@@ -109,53 +109,53 @@ export default function Courses() {
                 <div className="w-1 h-10 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-slate-100">{c.code}</span>
-                    <span className="text-sm text-slate-400">{c.name}</span>
+                    <span className="text-sm font-bold text-[var(--text-strong)]">{c.code}</span>
+                    <span className="text-sm text-[var(--text-muted)]">{c.name}</span>
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
-                    {c.instructor && <span className="text-xs text-slate-600">{c.instructor}</span>}
-                    {c.semester && <span className="text-xs text-slate-600">{c.semester}</span>}
-                    <span className="text-xs text-slate-600">{c.credits} credits</span>
+                    {c.instructor && <span className="text-xs text-[var(--text-faint)]">{c.instructor}</span>}
+                    {c.semester && <span className="text-xs text-[var(--text-faint)]">{c.semester}</span>}
+                    <span className="text-xs text-[var(--text-faint)]">{c.credits} credits</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-center">
-                    <p className="text-xs text-slate-600">Tasks</p>
-                    <p className="text-sm font-semibold text-slate-300">{cTasks}</p>
+                    <p className="text-xs text-[var(--text-faint)]">Tasks</p>
+                    <p className="text-sm font-semibold text-[var(--text)]">{cTasks}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-slate-600">Notes</p>
-                    <p className="text-sm font-semibold text-slate-300">{cNotes}</p>
+                    <p className="text-xs text-[var(--text-faint)]">Notes</p>
+                    <p className="text-sm font-semibold text-[var(--text)]">{cNotes}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-slate-600">Grade</p>
+                    <p className="text-xs text-[var(--text-faint)]">Grade</p>
                     <p className="text-sm font-semibold" style={{ color: grade ? c.color : "#4a5568" }}>
                       {grade ? `${grade}%` : "—"}
                     </p>
                   </div>
                   <div className="flex gap-1 ml-2">
-                    <button onClick={e => { e.stopPropagation(); openEdit(c); }} className="text-slate-600 hover:text-slate-300 p-1"><Edit2 size={13} /></button>
+                    <button onClick={e => { e.stopPropagation(); openEdit(c); }} className="text-[var(--text-faint)] hover:text-[var(--text-strong)] p-1"><Edit2 size={13} /></button>
                     <button onClick={e => { e.stopPropagation(); deleteCourse(c.id); }} className="text-red-700 hover:text-red-400 p-1"><Trash2 size={13} /></button>
                   </div>
-                  {isOpen ? <ChevronDown size={15} className="text-slate-600" /> : <ChevronRight size={15} className="text-slate-600" />}
+                  {isOpen ? <ChevronDown size={15} className="text-[var(--text-faint)]" /> : <ChevronRight size={15} className="text-[var(--text-faint)]" />}
                 </div>
               </div>
 
               {/* Expanded */}
               {isOpen && (
-                <div className="mt-4 pt-4 border-t border-[#1e2640] space-y-4">
+                <div className="mt-4 pt-4 border-t border-[var(--border)] space-y-4">
                   {c.description && (
                     <div>
-                      <p className="text-xs text-slate-600 font-semibold uppercase mb-1">Description</p>
-                      <p className="text-sm text-slate-400">{c.description}</p>
+                      <p className="text-xs text-[var(--text-faint)] font-semibold uppercase mb-1">Description</p>
+                      <p className="text-sm text-[var(--text-muted)]">{c.description}</p>
                     </div>
                   )}
                   {c.objectives.length > 0 && (
                     <div>
-                      <p className="text-xs text-slate-600 font-semibold uppercase mb-2">Learning Objectives</p>
+                      <p className="text-xs text-[var(--text-faint)] font-semibold uppercase mb-2">Learning Objectives</p>
                       <ul className="space-y-1">
                         {c.objectives.map((o, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                          <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-muted)]">
                             <span className="text-indigo-500 mt-0.5">•</span> {o}
                           </li>
                         ))}
@@ -166,27 +166,27 @@ export default function Courses() {
                   {/* Grade Tracker */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-slate-600 font-semibold uppercase">Grade Tracker</p>
+                      <p className="text-xs text-[var(--text-faint)] font-semibold uppercase">Grade Tracker</p>
                       <button onClick={() => openGradeAdd(c.id)} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
                         <Plus size={11} /> Add Assessment
                       </button>
                     </div>
                     {cGrades.length === 0 ? (
-                      <p className="text-slate-700 text-xs">No grades yet.</p>
+                    <p className="text-[var(--text-faint)] text-xs">No grades yet.</p>
                     ) : (
                       <div className="space-y-1.5">
                         {cGrades.map(g => (
-                          <div key={g.id} className="flex items-center gap-3 p-2 rounded-lg bg-[#0f1520] group">
+                          <div key={g.id} className="flex items-center gap-3 p-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] group">
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-slate-300">{g.assessment}</p>
+                              <p className="text-sm text-[var(--text)]">{g.assessment}</p>
                             </div>
                             <div className="flex items-center gap-3 text-sm">
-                              <span className="text-slate-400">{g.score}/{g.maxScore}</span>
-                              <span className="text-slate-600 text-xs">{g.weight}% weight</span>
+                              <span className="text-[var(--text-muted)]">{g.score}/{g.maxScore}</span>
+                              <span className="text-[var(--text-faint)] text-xs">{g.weight}% weight</span>
                               <span className="font-semibold" style={{ color: c.color }}>{((g.score / g.maxScore) * 100).toFixed(0)}%</span>
                             </div>
                             <div className="hidden group-hover:flex gap-1">
-                              <button onClick={() => openGradeEdit(g)} className="text-slate-600 hover:text-slate-300 p-1"><Edit2 size={11} /></button>
+                              <button onClick={() => openGradeEdit(g)} className="text-[var(--text-faint)] hover:text-[var(--text-strong)] p-1"><Edit2 size={11} /></button>
                               <button onClick={() => deleteGrade(g.id)} className="text-red-700 hover:text-red-400 p-1"><Trash2 size={11} /></button>
                             </div>
                           </div>
@@ -223,7 +223,7 @@ export default function Courses() {
             <label className="label">Color</label>
             <div className="flex gap-2 flex-wrap">
               {COLORS.map(col => (
-                <button key={col} onClick={() => setForm(p => ({ ...p, color: col }))} className={`w-7 h-7 rounded-full transition-transform ${form.color === col ? "ring-2 ring-white ring-offset-2 ring-offset-[#131825] scale-110" : ""}`} style={{ backgroundColor: col }} />
+                <button key={col} onClick={() => setForm(p => ({ ...p, color: col }))} className={`w-7 h-7 rounded-full transition-transform ${form.color === col ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--surface-1)] scale-110" : ""}`} style={{ backgroundColor: col }} />
               ))}
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function Courses() {
             </div>
             <div className="space-y-1">
               {form.objectives.map((o, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-slate-400">
+                <div key={i} className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
                   <span className="text-indigo-500">•</span>
                   <span className="flex-1">{o}</span>
                   <button onClick={() => setForm(p => ({ ...p, objectives: p.objectives.filter((_, j) => j !== i) }))} className="text-red-700 hover:text-red-400">×</button>
