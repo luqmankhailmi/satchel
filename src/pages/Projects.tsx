@@ -1,10 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import Modal from "../components/Modal";
-import { Plus, Trash2, Edit2, CheckCircle2, Circle, Users, Archive, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Edit2, CheckCircle2, Circle, Users, Archive, RotateCcw, GripVertical } from "lucide-react";
 import { Project, ProjectTask, TaskStatus, ProjectStatus } from "../types";
 import { format, parseISO } from "date-fns";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  useDraggable,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 const STATUS_BADGE: Record<ProjectStatus, string> = {
   active: "bg-indigo-900/40 text-indigo-300",
@@ -29,6 +42,12 @@ export default function Projects() {
   const [memberInput, setMemberInput] = useState("");
   const [taskForm, setTaskForm] = useState<Omit<ProjectTask, "id">>({ title: "", status: "todo", assignedTo: "", dueDate: "" });
   const [editingTask, setEditingTask] = useState<ProjectTask | null>(null);
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [overStatus, setOverStatus] = useState<TaskStatus | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   const selectedProject = projects.find(p => p.id === selected);
   const visibleProjects = useMemo(
@@ -87,6 +106,28 @@ export default function Projects() {
     if (!p.tasks.length) return 0;
     return Math.round((p.tasks.filter(t => t.status === "done").length / p.tasks.length) * 100);
   };
+
+  // ── dnd-kit handlers ─────────────────────────────────────────
+  const handleDragStart = (e: DragStartEvent) => setDraggingTaskId(e.active.id as string);
+  const handleDragOver  = (e: DragOverEvent)  => setOverStatus((e.over?.id as TaskStatus) ?? null);
+  const handleDragEnd   = (e: DragEndEvent)   => {
+    const { active, over } = e;
+    if (over && selected) {
+      const task = selectedProject?.tasks.find(t => t.id === active.id);
+      if (task && task.status !== over.id)
+        updateProjectTask(selected, active.id as string, { status: over.id as TaskStatus });
+    }
+    setDraggingTaskId(null);
+    setOverStatus(null);
+  };
+
+  const colMeta: Record<TaskStatus, { label: string; borderColor: string; activeColor: string }> = {
+    "todo":        { label: "To Do",       borderColor: "border-slate-600",  activeColor: "border-slate-400 bg-slate-800/20" },
+    "in-progress": { label: "In Progress", borderColor: "border-indigo-500", activeColor: "border-indigo-400 bg-indigo-900/20" },
+    "done":        { label: "Done",        borderColor: "border-emerald-500", activeColor: "border-emerald-400 bg-emerald-900/20" },
+  };
+
+  const draggingTask = selectedProject?.tasks.find(t => t.id === draggingTaskId);
 
   return (
     <div className="flex h-full">
@@ -210,44 +251,51 @@ export default function Projects() {
                 </button>
               </div>
 
-              {/* Columns */}
-              <div className="grid grid-cols-3 gap-4">
-                {(["todo", "in-progress", "done"] as TaskStatus[]).map(status => {
-                  const colTasks = selectedProject.tasks.filter(t => t.status === status);
-                  return (
-                    <div key={status} className="bg-[var(--surface-4)] rounded-xl border border-[var(--border-2)]">
-                      <div className="p-3 border-b border-[var(--border-2)] flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">{status.replace("-", " ")}</span>
-                        <span className="text-xs text-[var(--text-faint)]">{colTasks.length}</span>
-                      </div>
-                      <div className="p-2 space-y-2 min-h-[120px]">
+              {/* Kanban Board — dnd-kit */}
+              <DndContext
+                sensors={sensors}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="grid grid-cols-3 gap-4">
+                  {(["todo", "in-progress", "done"] as TaskStatus[]).map(status => {
+                    const colTasks = selectedProject.tasks.filter(t => t.status === status);
+                    const isOver = overStatus === status;
+                    const meta = colMeta[status];
+                    return (
+                      <ProjDropColumn
+                        key={status}
+                        id={status}
+                        label={meta.label}
+                        count={colTasks.length}
+                        isOver={isOver}
+                        activeColor={meta.activeColor}
+                      >
                         {colTasks.map(t => (
-                          <div key={t.id} className="card group p-3 hover:border-indigo-600/30 transition-colors">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => updateProjectTask(selectedProject.id, t.id, { status: t.status === "done" ? "todo" : "done" })}>
-                                {t.status === "done"
-                                  ? <CheckCircle2 size={14} className="text-emerald-500" />
-                                  : <Circle size={14} className="text-[var(--text-faint)] hover:text-indigo-400" />}
-                              </button>
-                              <p className={`text-sm flex-1 ${t.status === "done" ? "line-through text-[var(--text-faint)]" : "text-[var(--text)]"}`}>{t.title}</p>
-                              <div className="hidden group-hover:flex gap-1">
-                                <button onClick={() => openEditTask(t)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)]"><Edit2 size={11} /></button>
-                                <button onClick={() => deleteProjectTask(selectedProject.id, t.id)} className="text-red-600 hover:text-red-400"><Trash2 size={11} /></button>
-                              </div>
-                            </div>
-                            {(t.assignedTo || t.dueDate) && (
-                              <div className="flex items-center gap-2 mt-1.5 pl-5">
-                                {t.assignedTo && <span className="text-[10px] text-[var(--text-faint)]">{t.assignedTo}</span>}
-                                {t.dueDate && <span className="text-[10px] text-[var(--text-faint)] ml-auto">{format(parseISO(t.dueDate), "MMM d")}</span>}
-                              </div>
-                            )}
-                          </div>
+                          <ProjDraggableCard
+                            key={t.id}
+                            task={t}
+                            projectId={selectedProject.id}
+                            archivedAt={selectedProject.archivedAt}
+                            draggingId={draggingTaskId}
+                            onEdit={openEditTask}
+                            onDelete={(id) => deleteProjectTask(selectedProject.id, id)}
+                            onToggle={(id, s) => updateProjectTask(selectedProject.id, id, { status: s })}
+                          />
                         ))}
-                      </div>
+                      </ProjDropColumn>
+                    );
+                  })}
+                </div>
+                <DragOverlay>
+                  {draggingTask && (
+                    <div className="rotate-1 scale-105 shadow-2xl opacity-95 pointer-events-none">
+                      <ProjTaskCardInner task={draggingTask} archivedAt={selectedProject.archivedAt} />
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </DragOverlay>
+              </DndContext>
             </div>
           </>
         )}
@@ -319,6 +367,121 @@ export default function Projects() {
           </div>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+// ── Droppable column for project tasks ────────────────────────────────
+function ProjDropColumn({
+  id, label, count, isOver, activeColor, children,
+}: {
+  id: string; label: string; count: number;
+  isOver: boolean; activeColor: string; children: React.ReactNode;
+}) {
+  const { setNodeRef } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`rounded-xl border transition-colors duration-150 ${
+        isOver ? `${activeColor} border` : "bg-[var(--surface-4)] border-[var(--border-2)]"
+      }`}
+    >
+      <div className="p-3 border-b border-[var(--border-2)] flex items-center justify-between">
+        <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">{label}</span>
+        <span className="text-xs text-[var(--text-faint)]">{count}</span>
+      </div>
+      <div className="p-2 space-y-2 min-h-[120px]">
+        {children}
+        {count === 0 && (
+          <div className={`text-center py-6 text-xs transition-colors ${isOver ? "text-[var(--text-muted)]" : "text-[var(--text-faint)]"}`}>
+            {isOver ? "Drop here" : "Empty"}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Shared inner card (used by draggable + overlay) ───────────────────
+function ProjTaskCardInner({
+  task, archivedAt, dragHandleProps = {}, isDragging = false,
+  onEdit, onDelete, onToggle,
+}: {
+  task: ProjectTask;
+  archivedAt?: string;
+  dragHandleProps?: object;
+  isDragging?: boolean;
+  onEdit?: (t: ProjectTask) => void;
+  onDelete?: (id: string) => void;
+  onToggle?: (id: string, status: TaskStatus) => void;
+}) {
+  return (
+    <div className={`card group p-3 hover:border-indigo-600/30 transition-colors ${isDragging ? "opacity-40" : ""}`}>
+      <div className="flex items-center gap-2">
+        {!archivedAt && (
+          <span
+            {...dragHandleProps}
+            className="text-[var(--text-faint)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 cursor-grab active:cursor-grabbing"
+          >
+            <GripVertical size={13} />
+          </span>
+        )}
+        {onToggle && (
+          <button onClick={() => onToggle(task.id, task.status === "done" ? "todo" : "done")}>
+            {task.status === "done"
+              ? <CheckCircle2 size={14} className="text-emerald-500" />
+              : <Circle size={14} className="text-[var(--text-faint)] hover:text-indigo-400" />}
+          </button>
+        )}
+        <p className={`text-sm flex-1 ${task.status === "done" ? "line-through text-[var(--text-faint)]" : "text-[var(--text)]"}`}>{task.title}</p>
+        {(onEdit || onDelete) && (
+          <div className="hidden group-hover:flex gap-1">
+            {onEdit && <button onClick={() => onEdit(task)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)]"><Edit2 size={11} /></button>}
+            {onDelete && <button onClick={() => onDelete(task.id)} className="text-red-600 hover:text-red-400"><Trash2 size={11} /></button>}
+          </div>
+        )}
+      </div>
+      {(task.assignedTo || task.dueDate) && (
+        <div className="flex items-center gap-2 mt-1.5 pl-5">
+          {task.assignedTo && <span className="text-[10px] text-[var(--text-faint)]">{task.assignedTo}</span>}
+          {task.dueDate && <span className="text-[10px] text-[var(--text-faint)] ml-auto">{format(parseISO(task.dueDate), "MMM d")}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Draggable project task card ───────────────────────────────────────
+function ProjDraggableCard({
+  task, archivedAt, draggingId, onEdit, onDelete, onToggle,
+}: {
+  task: ProjectTask;
+  projectId: string;
+  archivedAt?: string;
+  draggingId: string | null;
+  onEdit: (t: ProjectTask) => void;
+  onDelete: (id: string) => void;
+  onToggle: (id: string, status: TaskStatus) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: task.id,
+    disabled: !!archivedAt,
+  });
+  const style: React.CSSProperties = transform
+    ? { transform: CSS.Translate.toString(transform), opacity: 0.4, zIndex: 50 }
+    : {};
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ProjTaskCardInner
+        task={task}
+        archivedAt={archivedAt}
+        dragHandleProps={archivedAt ? {} : { ...attributes, ...listeners }}
+        isDragging={draggingId === task.id}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onToggle={onToggle}
+      />
     </div>
   );
 }
