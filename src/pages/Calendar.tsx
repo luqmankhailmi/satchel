@@ -58,7 +58,7 @@ export default function Calendar() {
 
   const tasksByDate = useMemo(() => {
     const map: Record<string, typeof tasks> = {};
-    tasks.filter(t => t.dueDate && t.status !== "done").forEach(t => {
+    tasks.filter(t => !t.archivedAt && t.dueDate && t.status !== "done").forEach(t => {
       (map[t.dueDate!] ??= []).push(t);
     });
     return map;

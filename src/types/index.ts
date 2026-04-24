@@ -24,6 +24,7 @@ export interface Task {
   status: TaskStatus;
   createdAt: string;
   completedAt?: string;
+  archivedAt?: string;
 }
 
 export type EventType = "event" | "exam" | "assignment" | "reminder" | "holiday";
@@ -83,6 +84,7 @@ export interface Project {
   deadline?: string;
   status: ProjectStatus;
   createdAt: string;
+  archivedAt?: string;
 }
 
 export interface ExamPaper {

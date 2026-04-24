@@ -59,17 +59,18 @@ export default function Dashboard() {
   const [journalDate, setJournalDate] = useState(todayKey);
 
   const stats = useMemo(() => {
-    const pending = tasks.filter(t => t.status !== "done").length;
-    const overdue = tasks.filter(t => t.status !== "done" && t.dueDate && isBefore(parseISO(t.dueDate), startOfDay(today))).length;
-    const done = tasks.filter(t => t.status === "done").length;
-    const total = tasks.length;
+    const activeTasks = tasks.filter(t => !t.archivedAt);
+    const pending = activeTasks.filter(t => t.status !== "done").length;
+    const overdue = activeTasks.filter(t => t.status !== "done" && t.dueDate && isBefore(parseISO(t.dueDate), startOfDay(today))).length;
+    const done = activeTasks.filter(t => t.status === "done").length;
+    const total = activeTasks.length;
     return { pending, overdue, done, total, completion: total ? Math.round((done / total) * 100) : 0 };
   }, [tasks]);
 
   const upcoming = useMemo(() => {
     const next7 = addDays(today, 7);
     const taskEvents = tasks
-      .filter(t => t.status !== "done" && t.dueDate && isAfter(parseISO(t.dueDate), startOfDay(today)) && isBefore(parseISO(t.dueDate), next7))
+      .filter(t => !t.archivedAt && t.status !== "done" && t.dueDate && isAfter(parseISO(t.dueDate), startOfDay(today)) && isBefore(parseISO(t.dueDate), next7))
       .map(t => ({ id: t.id, title: t.title, date: t.dueDate!, type: "task" as const, courseId: t.courseId }));
     const calEvents = events
       .filter(e => isAfter(parseISO(e.date), startOfDay(today)) && isBefore(parseISO(e.date), next7))
@@ -237,15 +238,15 @@ export default function Dashboard() {
               <FolderKanban size={15} className="text-indigo-400" /> Overview
             </h2>
             <div className="space-y-2 text-sm">
-              {[
-                { label: "Courses", value: courses.length, path: "/courses" },
-                { label: "Notes", value: notes.length, path: "/notes" },
-                { label: "Projects", value: projects.filter(p => p.status === "active").length, path: "/projects" },
-              ].map(({ label, value, path }) => (
-                <div
-                  key={label}
-                  onClick={() => navigate(path)}
-                  className="flex justify-between items-center cursor-pointer hover:text-indigo-300 transition-colors"
+                {[
+                  { label: "Courses", value: courses.length, path: "/courses" },
+                  { label: "Notes", value: notes.length, path: "/notes" },
+                  { label: "Projects", value: projects.filter(p => !p.archivedAt && p.status === "active").length, path: "/projects" },
+                ].map(({ label, value, path }) => (
+                  <div
+                    key={label}
+                    onClick={() => navigate(path)}
+                    className="flex justify-between items-center cursor-pointer hover:text-indigo-300 transition-colors"
                 >
                   <span className="text-[var(--text-muted)]">{label}</span>
                   <span className="text-[var(--text-strong)] font-semibold">{value}</span>

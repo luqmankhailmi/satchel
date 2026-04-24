@@ -96,7 +96,7 @@ export default function Courses() {
           const isOpen = expanded === c.id;
           const cGrades = courseGrades(c.id);
           const grade = computeGrade(c.id);
-          const cTasks = tasks.filter(t => t.courseId === c.id && t.status !== "done").length;
+          const cTasks = tasks.filter(t => !t.archivedAt && t.courseId === c.id && t.status !== "done").length;
           const cNotes = notes.filter(n => n.courseId === c.id).length;
 
           return (

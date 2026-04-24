@@ -34,7 +34,13 @@ export default function SearchPage() {
 
     const taskResults = tasks
       .filter(t => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q))
-      .map(t => ({ id: t.id, type: "task" as ResultType, title: t.title, subtitle: t.description || t.status, path: "/tasks" }));
+      .map(t => ({
+        id: t.id,
+        type: "task" as ResultType,
+        title: t.title,
+        subtitle: t.archivedAt ? `Archived - ${t.description || t.status}` : (t.description || t.status),
+        path: t.archivedAt ? "/tasks?filter=archived" : "/tasks",
+      }));
 
     const noteResults = notes
       .filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q))
@@ -46,7 +52,13 @@ export default function SearchPage() {
 
     const projectResults = projects
       .filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
-      .map(p => ({ id: p.id, type: "project" as ResultType, title: p.name, subtitle: p.description, path: "/projects" }));
+      .map(p => ({
+        id: p.id,
+        type: "project" as ResultType,
+        title: p.name,
+        subtitle: p.archivedAt ? `Archived - ${p.description}` : p.description,
+        path: p.archivedAt ? "/projects?view=archived" : "/projects",
+      }));
 
     const examResults = examPapers
       .filter(p => {

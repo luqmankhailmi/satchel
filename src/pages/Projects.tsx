@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import Modal from "../components/Modal";
-import { Plus, Trash2, Edit2, CheckCircle2, Circle, Users } from "lucide-react";
+import { Plus, Trash2, Edit2, CheckCircle2, Circle, Users, Archive, RotateCcw } from "lucide-react";
 import { Project, ProjectTask, TaskStatus, ProjectStatus } from "../types";
 import { format, parseISO } from "date-fns";
 
@@ -16,8 +17,11 @@ const blankProject = (): Omit<Project, "id" | "createdAt" | "tasks"> => ({
 });
 
 export default function Projects() {
-  const { projects, courses, addProject, updateProject, deleteProject, addProjectTask, updateProjectTask, deleteProjectTask } = useStore();
+  const { projects, courses, addProject, updateProject, addProjectTask, updateProjectTask, deleteProjectTask, archiveProject, unarchiveProject } = useStore();
+  const [searchParams] = useSearchParams();
+  const initialView = searchParams.get("view") === "archived" ? "archived" : "active";
   const [selected, setSelected] = useState<string | null>(null);
+  const [view, setView] = useState<"active" | "archived">(initialView);
   const [modal, setModal] = useState(false);
   const [taskModal, setTaskModal] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
@@ -27,7 +31,17 @@ export default function Projects() {
   const [editingTask, setEditingTask] = useState<ProjectTask | null>(null);
 
   const selectedProject = projects.find(p => p.id === selected);
+  const visibleProjects = useMemo(
+    () => projects.filter(p => (view === "archived" ? !!p.archivedAt : !p.archivedAt)),
+    [projects, view]
+  );
   const getCourse = (id?: string) => courses.find(c => c.id === id);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+    if (view === "active" && selectedProject.archivedAt) setSelected(null);
+    if (view === "archived" && !selectedProject.archivedAt) setSelected(null);
+  }, [view, selectedProject]);
 
   const openAdd = () => { setEditing(null); setForm(blankProject()); setMemberInput(""); setModal(true); };
   const openEdit = (p: Project) => {
@@ -77,21 +91,38 @@ export default function Projects() {
   return (
     <div className="flex h-full">
       {/* Project List */}
-      <div className="w-72 shrink-0 border-r border-[var(--border-2)] flex flex-col">
-        <div className="p-4 border-b border-[var(--border-2)] flex items-center justify-between">
-          <h1 className="text-base font-bold text-[var(--text-strong)]">Projects</h1>
-          <button onClick={openAdd} className="btn-primary py-1.5 px-2.5 flex items-center gap-1 text-xs">
-            <Plus size={12} /> New
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {projects.length === 0 && <p className="text-[var(--text-faint)] text-xs text-center py-8">No projects yet.</p>}
-          {projects.map(p => {
-            const prog = progress(p);
-            const course = getCourse(p.courseId);
-            return (
-              <div
-                key={p.id}
+        <div className="w-72 shrink-0 border-r border-[var(--border-2)] flex flex-col">
+          <div className="p-4 border-b border-[var(--border-2)] flex items-center justify-between">
+            <div>
+              <h1 className="text-base font-bold text-[var(--text-strong)]">Projects</h1>
+              <div className="flex border border-[var(--border)] rounded-lg overflow-hidden mt-2 w-fit">
+                {([["active", "Active"], ["archived", "Archived"]] as const).map(([val, lbl]) => (
+                  <button
+                    key={val}
+                    onClick={() => setView(val)}
+                    className={`px-2.5 py-1 text-[10px] font-semibold transition-colors ${view === val ? "bg-indigo-600 text-white" : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"}`}
+                  >
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={openAdd} className="btn-primary py-1.5 px-2.5 flex items-center gap-1 text-xs">
+              <Plus size={12} /> New
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {visibleProjects.length === 0 && (
+              <p className="text-[var(--text-faint)] text-xs text-center py-8">
+                {view === "archived" ? "No archived projects." : "No projects yet."}
+              </p>
+            )}
+            {visibleProjects.map(p => {
+              const prog = progress(p);
+              const course = getCourse(p.courseId);
+              return (
+                <div
+                  key={p.id}
                 onClick={() => setSelected(p.id)}
                 className={`p-4 border-b border-[var(--border-2)] cursor-pointer hover:bg-[var(--surface-3)] transition-colors ${selected === p.id ? "bg-[var(--surface-3)] border-l-2 border-l-indigo-500" : ""}`}
               >
@@ -132,9 +163,23 @@ export default function Projects() {
                   <button onClick={() => openEdit(selectedProject)} className="btn-secondary py-1.5 px-2.5 flex items-center gap-1 text-xs">
                     <Edit2 size={12} /> Edit
                   </button>
-                  <button onClick={() => { deleteProject(selectedProject.id); setSelected(null); }} className="btn-danger py-1.5 px-2.5 text-xs">
-                    <Trash2 size={12} />
-                  </button>
+                  {selectedProject.archivedAt ? (
+                    <button
+                      onClick={() => { unarchiveProject(selectedProject.id); setSelected(null); }}
+                      className="btn-secondary py-1.5 px-2.5 flex items-center gap-1 text-xs"
+                      title="Unarchive project"
+                    >
+                      <RotateCcw size={12} /> Unarchive
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { archiveProject(selectedProject.id); setSelected(null); }}
+                      className="btn-secondary py-1.5 px-2.5 flex items-center gap-1 text-xs"
+                      title="Archive project"
+                    >
+                      <Archive size={12} /> Archive
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-4 mt-3">
@@ -155,7 +200,12 @@ export default function Projects() {
                 <h3 className="text-sm font-semibold text-[var(--text-strong)]">
                   Tasks ({selectedProject.tasks.filter(t => t.status === "done").length}/{selectedProject.tasks.length})
                 </h3>
-                <button onClick={openAddTask} className="btn-primary py-1.5 px-2.5 flex items-center gap-1 text-xs">
+                <button
+                  onClick={openAddTask}
+                  disabled={!!selectedProject.archivedAt}
+                  className={`btn-primary py-1.5 px-2.5 flex items-center gap-1 text-xs ${selectedProject.archivedAt ? "opacity-50 cursor-not-allowed" : ""}`}
+                  title={selectedProject.archivedAt ? "Unarchive to add tasks" : undefined}
+                >
                   <Plus size={12} /> Add Task
                 </button>
               </div>

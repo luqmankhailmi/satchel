@@ -31,6 +31,8 @@ interface AppState {
   updateTask: (id: string, t: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   completeTask: (id: string) => void;
+  archiveTask: (id: string) => void;
+  unarchiveTask: (id: string) => void;
 
   // Events
   addEvent: (e: Omit<CalendarEvent, "id">) => void;
@@ -51,6 +53,8 @@ interface AppState {
   addProject: (p: Omit<Project, "id" | "createdAt" | "tasks">) => void;
   updateProject: (id: string, p: Partial<Project>) => void;
   deleteProject: (id: string) => void;
+  archiveProject: (id: string) => void;
+  unarchiveProject: (id: string) => void;
   addProjectTask: (projectId: string, t: Omit<ProjectTask, "id">) => void;
   updateProjectTask: (projectId: string, taskId: string, t: Partial<ProjectTask>) => void;
   deleteProjectTask: (projectId: string, taskId: string) => void;
@@ -112,6 +116,18 @@ export const useStore = create<AppState>()(
             x.id === id ? { ...x, status: "done", completedAt: new Date().toISOString() } : x
           ),
         })),
+      archiveTask: (id) =>
+        set((s) => ({
+          tasks: s.tasks.map((x) => (x.id === id ? { ...x, archivedAt: new Date().toISOString() } : x)),
+        })),
+      unarchiveTask: (id) =>
+        set((s) => ({
+          tasks: s.tasks.map((x) => {
+            if (x.id !== id) return x;
+            const { archivedAt: _, ...rest } = x;
+            return rest;
+          }),
+        })),
 
       // Events
       addEvent: (e) =>
@@ -150,6 +166,18 @@ export const useStore = create<AppState>()(
         set((s) => ({ projects: s.projects.map((x) => (x.id === id ? { ...x, ...p } : x)) })),
       deleteProject: (id) =>
         set((s) => ({ projects: s.projects.filter((x) => x.id !== id) })),
+      archiveProject: (id) =>
+        set((s) => ({
+          projects: s.projects.map((p) => (p.id === id ? { ...p, archivedAt: new Date().toISOString() } : p)),
+        })),
+      unarchiveProject: (id) =>
+        set((s) => ({
+          projects: s.projects.map((p) => {
+            if (p.id !== id) return p;
+            const { archivedAt: _, ...rest } = p;
+            return rest;
+          }),
+        })),
       addProjectTask: (projectId, t) =>
         set((s) => ({
           projects: s.projects.map((p) =>

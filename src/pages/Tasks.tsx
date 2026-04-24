@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import Modal from "../components/Modal";
-import { Plus, Trash2, Edit2, CheckCircle2, Circle, Clock } from "lucide-react";
+import { Plus, Edit2, CheckCircle2, Circle, Clock, Archive, RotateCcw } from "lucide-react";
 import { Task, TaskStatus, TaskPriority } from "../types";
 import { format, parseISO, isBefore, startOfDay } from "date-fns";
 
@@ -17,21 +18,34 @@ const blank = (): Omit<Task, "id" | "createdAt"> => ({
 });
 
 export default function Tasks() {
-  const { tasks, courses, addTask, updateTask, deleteTask, completeTask } = useStore();
+  const { tasks, courses, addTask, updateTask, completeTask, archiveTask, unarchiveTask } = useStore();
+  const [searchParams] = useSearchParams();
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
   const [form, setForm] = useState(blank());
-  const [filter, setFilter] = useState<"all" | TaskStatus>("all");
+  const initialFilter = searchParams.get("filter") === "archived" ? "archived" : "all";
+  const [filter, setFilter] = useState<"all" | TaskStatus | "archived">(initialFilter);
   const [courseFilter, setCourseFilter] = useState("");
 
-  const filtered = useMemo(() =>
-    tasks.filter(t =>
-      (filter === "all" || t.status === filter) &&
-      (!courseFilter || t.courseId === courseFilter)
-    ).sort((a, b) => {
+  const activeTasks = useMemo(() => tasks.filter(t => !t.archivedAt), [tasks]);
+
+  const filtered = useMemo(() => {
+    let list = tasks;
+
+    if (filter === "archived") list = list.filter(t => !!t.archivedAt);
+    else list = list.filter(t => !t.archivedAt && (filter === "all" || t.status === filter));
+
+    if (courseFilter) list = list.filter(t => t.courseId === courseFilter);
+
+    if (filter === "archived") {
+      return list.sort((a, b) => (b.archivedAt ?? "").localeCompare(a.archivedAt ?? ""));
+    }
+
+    return list.sort((a, b) => {
       const p = { high: 0, medium: 1, low: 2 };
       return p[a.priority] - p[b.priority];
-    }), [tasks, filter, courseFilter]);
+    });
+  }, [tasks, filter, courseFilter]);
 
   const columns: { id: TaskStatus; label: string; color: string }[] = [
     { id: "todo", label: "To Do", color: "border-slate-600" },
@@ -65,7 +79,7 @@ export default function Tasks() {
         <div>
           <h1 className="text-xl font-bold text-[var(--text-strong)]">Tasks</h1>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            {tasks.filter(t => t.status !== "done").length} pending · {tasks.filter(t => t.status === "done").length} done
+            {activeTasks.filter(t => t.status !== "done").length} pending · {activeTasks.filter(t => t.status === "done").length} done
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -74,7 +88,7 @@ export default function Tasks() {
             {courses.map(c => <option key={c.id} value={c.id}>{c.code}</option>)}
           </select>
           <div className="flex border border-[var(--border)] rounded-lg overflow-hidden">
-            {([["all", "All"], ["todo", "Todo"], ["in-progress", "Active"], ["done", "Done"]] as const).map(([val, lbl]) => (
+            {([["all", "All"], ["todo", "Todo"], ["in-progress", "Active"], ["done", "Done"], ["archived", "Archived"]] as const).map(([val, lbl]) => (
               <button
                 key={val}
                 onClick={() => setFilter(val)}
@@ -100,7 +114,19 @@ export default function Tasks() {
                   <span className="text-xs text-[var(--text-faint)] bg-[var(--border-2)] rounded-full px-2 py-0.5">{colTasks.length}</span>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                  {colTasks.map(t => <TaskCard key={t.id} task={t} getCourse={getCourse} isOverdue={isOverdue} onEdit={openEdit} onDelete={deleteTask} onComplete={completeTask} onStatus={(id, status) => updateTask(id, { status })} />)}
+                  {colTasks.map(t => (
+                    <TaskCard
+                      key={t.id}
+                      task={t}
+                      getCourse={getCourse}
+                      isOverdue={isOverdue}
+                      onEdit={openEdit}
+                      onArchive={archiveTask}
+                      onUnarchive={unarchiveTask}
+                      onComplete={completeTask}
+                      onStatus={(id, status) => updateTask(id, { status })}
+                    />
+                  ))}
                   {colTasks.length === 0 && (
                     <div className="text-center py-8 text-[var(--text-faint)] text-xs">Empty</div>
                   )}
@@ -112,7 +138,19 @@ export default function Tasks() {
       ) : (
         /* List View */
         <div className="space-y-2 flex-1 overflow-y-auto">
-          {filtered.map(t => <TaskCard key={t.id} task={t} getCourse={getCourse} isOverdue={isOverdue} onEdit={openEdit} onDelete={deleteTask} onComplete={completeTask} onStatus={(id, status) => updateTask(id, { status })} />)}
+          {filtered.map(t => (
+            <TaskCard
+              key={t.id}
+              task={t}
+              getCourse={getCourse}
+              isOverdue={isOverdue}
+              onEdit={openEdit}
+              onArchive={archiveTask}
+              onUnarchive={unarchiveTask}
+              onComplete={completeTask}
+              onStatus={(id, status) => updateTask(id, { status })}
+            />
+          ))}
           {filtered.length === 0 && <p className="text-[var(--text-faint)] text-sm text-center py-16">No tasks found.</p>}
         </div>
       )}
@@ -168,22 +206,29 @@ export default function Tasks() {
   );
 }
 
-function TaskCard({ task, getCourse, isOverdue, onEdit, onDelete, onComplete, onStatus }: {
+function TaskCard({ task, getCourse, isOverdue, onEdit, onArchive, onUnarchive, onComplete, onStatus }: {
   task: Task;
   getCourse: (id?: string) => any;
   isOverdue: (t: Task) => boolean | "" | undefined;
   onEdit: (t: Task) => void;
-  onDelete: (id: string) => void;
+  onArchive: (id: string) => void;
+  onUnarchive: (id: string) => void;
   onComplete: (id: string) => void;
   onStatus: (id: string, status: TaskStatus) => void;
 }) {
   const course = getCourse(task.courseId);
   const overdue = isOverdue(task);
+  const archived = !!task.archivedAt;
 
   return (
     <div className={`card group flex flex-col gap-2 hover:border-indigo-600/30 transition-colors ${overdue ? "border-red-900/40" : ""}`}>
       <div className="flex items-start gap-2">
-        <button onClick={() => task.status === "done" ? onStatus(task.id, "todo") : onComplete(task.id)} className="mt-0.5 shrink-0">
+        <button
+          disabled={archived}
+          onClick={() => task.status === "done" ? onStatus(task.id, "todo") : onComplete(task.id)}
+          className={`mt-0.5 shrink-0 ${archived ? "opacity-50 cursor-not-allowed" : ""}`}
+          title={archived ? "Archived" : undefined}
+        >
           {task.status === "done"
             ? <CheckCircle2 size={16} className="text-emerald-500" />
             : <Circle size={16} className="text-[var(--text-faint)] hover:text-indigo-400 transition-colors" />}
@@ -194,11 +239,20 @@ function TaskCard({ task, getCourse, isOverdue, onEdit, onDelete, onComplete, on
         </div>
         <div className="hidden group-hover:flex gap-1">
           <button onClick={() => onEdit(task)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1"><Edit2 size={12} /></button>
-          <button onClick={() => onDelete(task.id)} className="text-red-600 hover:text-red-400 p-1"><Trash2 size={12} /></button>
+          {archived ? (
+            <button onClick={() => onUnarchive(task.id)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1" title="Unarchive">
+              <RotateCcw size={12} />
+            </button>
+          ) : (
+            <button onClick={() => onArchive(task.id)} className="text-[var(--text-muted)] hover:text-[var(--text-strong)] p-1" title="Archive">
+              <Archive size={12} />
+            </button>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
         <span className={`badge ${PRIORITY_BADGE[task.priority]}`}>{task.priority}</span>
+        {archived && <span className="badge bg-slate-800/40 text-slate-300">archived</span>}
         {course && (
           <span className="badge text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: course.color + "25", color: course.color }}>
             {course.code}
